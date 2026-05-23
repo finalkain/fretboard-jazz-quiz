@@ -306,16 +306,16 @@ body.hide-string-note .q-string-note { display: none; }
   background: rgba(88, 166, 255, 0.05);
 }
 
-/* Inlay dots between strings 3 and 4 at frets 3,5,7,9 and double at 12 */
+/* Inlay dots — absolutely positioned overlay, do not occupy grid cells */
 .inlay-dot {
-  align-self: center;
-  justify-self: center;
+  position: absolute;
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: rgba(220, 220, 220, 0.22);
   pointer-events: none;
   z-index: 0;
+  transform: translate(-50%, -50%);
 }
 
 /* Tap states (raise above the string line) */

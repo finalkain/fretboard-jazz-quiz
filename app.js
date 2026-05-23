@@ -134,26 +134,24 @@ function buildFretboard() {
     }
   }
 
-  // Inlay dots like a real guitar fretboard.
-  // Single dots at frets 3,5,7,9 — between strings 3 (idx 3) and 4 (idx 2)
-  // Grid rows: row 1 = header, then strings idx 0..5 in rows 2..7.
-  // Boundary between idx 2 and idx 3 = between rows 4 and 5 → grid-row: 4 / 6, align-self center.
-  const singleFrets = [3, 5, 7, 9];
-  singleFrets.forEach(f => {
+  // Inlay dots — positioned ABSOLUTELY so they don't disturb grid auto-flow.
+  // Label col is 32px wide, header row 22px tall.
+  // Fret X center: 32px + (containerW - 32px) * (X + 0.5) / 13
+  // String-boundary Y (between idx I-1 and I, counting from top): 22px + (containerH - 22px) * I / 6
+  const fretCenter = (f) => `calc(32px + (100% - 32px) * ${f + 0.5} / 13)`;
+  const stringBoundary = (i) => `calc(22px + (100% - 22px) * ${i} / 6)`;
+  const addInlay = (f, boundaryIdx) => {
     const d = document.createElement('div');
     d.className = 'inlay-dot';
-    d.style.gridRow = '4 / 6';
-    d.style.gridColumn = `${f + 2} / ${f + 3}`;
+    d.style.left = fretCenter(f);
+    d.style.top = stringBoundary(boundaryIdx);
     fretboardEl.appendChild(d);
-  });
-  // Double dots at fret 12: between strings 2-3 and strings 4-5
-  [['3 / 5', 'top'], ['5 / 7', 'bot']].forEach(([rowSpan]) => {
-    const d = document.createElement('div');
-    d.className = 'inlay-dot';
-    d.style.gridRow = rowSpan;
-    d.style.gridColumn = `${12 + 2} / ${12 + 3}`;
-    fretboardEl.appendChild(d);
-  });
+  };
+  // Single dots: between strings 4 (idx 2) and 3 (idx 3) → boundary idx = 3
+  [3, 5, 7, 9].forEach(f => addInlay(f, 3));
+  // Fret 12 double: between strings 5-4 (boundary 2) and strings 3-2 (boundary 4)
+  addInlay(12, 2);
+  addInlay(12, 4);
 }
 
 function updateFretboard() {

@@ -20,21 +20,27 @@
     <span class="score-sep">·</span>
     <span id="correct">0</span>/<span id="total">0</span>
   </div>
+  <button id="helpBtn" class="icon-btn" aria-label="도움말">?</button>
   <button id="modeBtn" class="mode-btn">A</button>
 </header>
 
 <section class="question">
-  <div class="q-chord"><span id="qRoot">—</span><span id="qType"></span></div>
+  <div class="q-prompt">
+    <span class="q-prompt-label">찾으세요:</span>
+    <span class="q-chord-inline"><span id="qRoot">—</span><span id="qType"></span></span>
+    의 <span class="q-tone-wrap" id="qToneWrap"><span class="q-tone" id="qTone">—</span></span><span class="q-tone-mode-b" id="qAllTonesLabel">구성음 전부</span>
+  </div>
   <div class="q-detail">
-    <span class="q-string"><span id="qStringLabel">—</span>번 줄 <span class="q-string-note">(<span id="qStringNote">—</span>)</span></span>
-    <span class="q-tone-wrap" id="qToneWrap">
-      <span class="q-arrow">→</span>
-      <span class="q-tone" id="qTone">—</span>
-    </span>
+    <span class="q-string-pill"><span id="qStringLabel">—</span>번 줄<span class="q-string-note"> (<span id="qStringNote">—</span>)</span></span>
+    <span class="q-instr">에서 탭하세요</span>
   </div>
 </section>
 
 <section class="fretboard-wrap">
+  <div class="fretboard-legend">
+    <span>← 6번 줄 (저음 E)</span>
+    <span>1번 줄 (고음 E) →</span>
+  </div>
   <div class="fretboard" id="fretboard" aria-label="기타 지판"></div>
 </section>
 
@@ -43,6 +49,27 @@
   <button id="submitBtn" class="primary-btn" hidden>제출</button>
   <button id="nextBtn" class="primary-btn">다음 문제</button>
 </section>
+
+<dialog id="helpDialog" class="settings-dialog">
+  <form method="dialog">
+    <h2>풀이 방법</h2>
+    <ol class="help-list">
+      <li>상단에 출제된 <b>코드 + 찾을 음</b>(예: <i>Cmaj7의 ♭3</i>)을 확인합니다.</li>
+      <li>지정된 <b>줄(string)</b>이 지판에서 파란색으로 강조됩니다. 해당 줄에서만 탭할 수 있어요.</li>
+      <li>그 줄의 0~12프렛 중 정답 음에 해당하는 칸을 <b>탭</b>합니다.</li>
+      <li><b>모드 A</b>: 매 문제 한 음만 찾으면 됩니다. 정답이면 자동으로 다음 문제.</li>
+      <li><b>모드 B</b>: 그 줄에서 코드의 <b>모든 구성음(4개)</b>을 탭한 뒤 <b>제출</b>을 누릅니다.</li>
+    </ol>
+    <p class="help-note">
+      💡 <b>줄 번호 규칙</b>: 6번 줄 = 가장 굵은 저음 E, 1번 줄 = 가장 가는 고음 E. 지판은 위에서 내려다본 시점으로, 왼쪽이 6번 줄입니다.<br>
+      💡 처음에는 ⚙ 설정에서 "지판에 음이름 표시"를 켜두고 익히는 것을 권장합니다.<br>
+      💡 오답이면 정답 위치가 노란색으로 표시됩니다.
+    </p>
+    <div class="dialog-actions">
+      <button value="close" class="primary-btn">시작</button>
+    </div>
+  </form>
+</dialog>
 
 <dialog id="settingsDialog" class="settings-dialog">
   <form method="dialog">

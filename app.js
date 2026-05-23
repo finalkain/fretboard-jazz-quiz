@@ -405,6 +405,22 @@ dialog.addEventListener('close', () => {
   nextQuestion();
 });
 
+const helpDialog = document.getElementById('helpDialog');
+function openHelp() {
+  if (typeof helpDialog.showModal === 'function') helpDialog.showModal();
+  else helpDialog.setAttribute('open', '');
+}
+document.getElementById('helpBtn').addEventListener('click', openHelp);
+
+// Auto-show help on first visit
+const FIRST_RUN_KEY = 'fretquiz.seen.help.v1';
+if (!localStorage.getItem(FIRST_RUN_KEY)) {
+  setTimeout(() => {
+    openHelp();
+    localStorage.setItem(FIRST_RUN_KEY, '1');
+  }, 200);
+}
+
 modeBtn.addEventListener('click', () => {
   settings.mode = settings.mode === 'A' ? 'B' : 'A';
   saveSettings();

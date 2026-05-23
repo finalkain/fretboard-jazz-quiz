@@ -88,39 +88,82 @@ body {
 
 /* ── Question ──────────────────────────────── */
 .question {
-  padding: 16px 16px 8px;
+  padding: 14px 16px 6px;
   text-align: center;
 }
-.q-chord {
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  line-height: 1.1;
+.q-prompt {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
 }
-.q-chord #qType {
-  font-size: 26px;
-  color: var(--accent);
-  margin-left: 2px;
-}
-.q-detail {
-  margin-top: 8px;
+.q-prompt-label {
+  color: var(--fg-dim);
+  font-weight: 500;
   font-size: 16px;
+  margin-right: 4px;
+}
+.q-chord-inline {
+  font-weight: 800;
+  font-size: 26px;
+}
+.q-chord-inline #qType {
+  color: var(--accent);
+}
+.q-tone {
+  color: var(--warn);
+  font-weight: 800;
+  font-size: 26px;
+  padding: 0 4px;
+}
+.q-tone-mode-b { display: none; color: var(--warn); font-weight: 700; }
+body.mode-b .q-tone-wrap { display: none; }
+body.mode-b .q-tone-mode-b { display: inline; }
+
+.q-detail {
+  margin-top: 10px;
+  font-size: 15px;
   color: var(--fg-dim);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
-.q-string-note { color: var(--fg-dim); opacity: 0.7; font-size: 14px; margin-left: 2px; }
-.q-tone {
-  color: var(--warn);
+.q-string-pill {
+  background: rgba(88, 166, 255, 0.18);
+  color: var(--accent);
+  padding: 4px 10px;
+  border-radius: 999px;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
 }
-.q-arrow { color: var(--fg-dim); opacity: 0.5; }
-body.mode-b .q-tone-wrap { display: none; }
+.q-string-note { opacity: 0.75; font-weight: 500; }
+.q-instr { font-size: 14px; }
 body.hide-string-note .q-string-note { display: none; }
+
+.fretboard-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--fg-dim);
+  opacity: 0.6;
+  padding: 0 4px 4px;
+}
+
+/* Help list */
+.help-list { padding-left: 20px; line-height: 1.6; font-size: 15px; }
+.help-list li { margin-bottom: 6px; }
+.help-list i { color: var(--warn); font-style: normal; font-weight: 700; }
+.help-note {
+  background: var(--bg-elev-2);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg-dim);
+}
+.help-note b { color: var(--fg); }
 
 /* ── Fretboard ─────────────────────────────── */
 .fretboard-wrap {
@@ -148,13 +191,30 @@ body.hide-string-note .q-string-note { display: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--fg-dim);
   background: var(--bg-elev-2);
   border-bottom: 1px solid var(--fret-line);
+  position: relative;
 }
-.string-header.active { color: var(--accent); }
+.string-header.active {
+  color: white;
+  background: var(--accent-dim);
+}
+.string-header.active::after {
+  content: "↓";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-2px);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(13, 17, 23, 0.8);
+  pointer-events: none;
+  z-index: 2;
+}
 
 .fret-label {
   display: flex;

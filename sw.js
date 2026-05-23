@@ -1,6 +1,6 @@
 // Simple offline-first cache for the PWA.
 // Bump CACHE_VERSION whenever assets change so users get the update.
-const CACHE_VERSION = 'fretquiz-v1';
+const CACHE_VERSION = 'fretquiz-v2';
 const ASSETS = [
   './',
   './index.html',

@@ -213,10 +213,12 @@ body.hide-string-note .q-string-note { display: none; }
 .fretboard-wrap {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: stretch;
   padding: 8px 12px 0;
   min-height: 0;
 }
+.fretboard-wrap .fretboard { flex: 1; }
 
 .fretboard {
   flex: 1;

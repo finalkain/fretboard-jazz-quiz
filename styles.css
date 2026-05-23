@@ -223,16 +223,18 @@ body.hide-string-note .q-string-note { display: none; }
 .fretboard {
   flex: 1;
   display: grid;
-  grid-template-columns: 28px repeat(6, 1fr);
-  grid-template-rows: 28px repeat(13, 1fr);
+  /* Horizontal layout: 1 label col + 13 fret cols, 1 header row + 6 string rows */
+  grid-template-columns: 32px repeat(13, 1fr);
+  grid-template-rows: 22px repeat(6, 1fr);
   background: var(--bg-elev);
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--bg-elev-2);
   position: relative;
-  min-height: 480px;
+  min-height: 280px;
 }
 
+/* Left column: string labels (6,5,4,3,2,1 top→bottom) */
 .string-header {
   display: flex;
   align-items: center;
@@ -241,7 +243,7 @@ body.hide-string-note .q-string-note { display: none; }
   font-weight: 700;
   color: var(--fg-dim);
   background: var(--bg-elev-2);
-  border-bottom: 1px solid var(--fret-line);
+  border-right: 1px solid var(--fret-line);
   position: relative;
 }
 .string-header.active {
@@ -249,19 +251,20 @@ body.hide-string-note .q-string-note { display: none; }
   background: var(--accent-dim);
 }
 .string-header.active::after {
-  content: "↓";
+  content: "→";
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-2px);
+  left: 100%;
+  top: 50%;
+  transform: translate(-3px, -50%);
   color: var(--accent);
   font-size: 12px;
   font-weight: 700;
   text-shadow: 0 0 4px rgba(13, 17, 23, 0.8);
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 
+/* Top row: fret number labels (0..12 left→right) */
 .fret-label {
   display: flex;
   align-items: center;
@@ -269,12 +272,9 @@ body.hide-string-note .q-string-note { display: none; }
   font-size: 11px;
   color: var(--fg-dim);
   background: var(--bg-elev-2);
-  border-right: 1px solid var(--fret-line);
-}
-.fret-label.corner {
-  background: var(--bg-elev-2);
   border-bottom: 1px solid var(--fret-line);
 }
+.fret-label.corner { background: var(--bg-elev-2); }
 
 .cell {
   position: relative;
@@ -283,59 +283,49 @@ body.hide-string-note .q-string-note { display: none; }
   justify-content: center;
   font-size: 13px;
   color: transparent;
-  border-bottom: 1px solid var(--fret-line);
+  border-right: 1px solid var(--fret-line);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.4);
   cursor: pointer;
   transition: background 120ms ease;
 }
-.cell:not(.active-string) { opacity: 0.35; pointer-events: none; }
+.cell:not(.active-string) { opacity: 0.4; pointer-events: none; }
 
-/* Vertical string lines (rendered as ::before on each cell column via active-string only is too complex;
-   we approximate strings by giving the active column a centerline) */
+/* Active string: horizontal centerline across the row */
 .cell.active-string::before {
   content: "";
   position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 2px;
+  left: 0; right: 0;
+  top: 50%;
+  height: 2px;
   background: var(--string-active);
-  opacity: 0.5;
-  transform: translateX(-50%);
+  opacity: 0.55;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 .cell.active-string {
-  background: rgba(88, 166, 255, 0.04);
+  background: rgba(88, 166, 255, 0.05);
 }
 
-/* Inlay dots (3, 5, 7, 9 frets in classic guitar) shown on labels */
-.fret-label.inlay::after {
-  content: "•";
-  color: var(--fg-dim);
-  opacity: 0.5;
-  margin-left: 2px;
-}
-.fret-label.inlay-double::after {
-  content: "••";
-  color: var(--fg-dim);
-  opacity: 0.5;
-  margin-left: 2px;
-  letter-spacing: -2px;
+/* Inlay dots between strings 3 and 4 at frets 3,5,7,9 and double at 12 */
+.inlay-dot {
+  align-self: center;
+  justify-self: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(220, 220, 220, 0.22);
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Tap states */
-.cell.tapped {
-  background: var(--tap);
+/* Tap states (raise above the string line) */
+.cell.tapped, .cell.correct, .cell.wrong, .cell.hint {
+  z-index: 2;
 }
-.cell.correct {
-  background: var(--tap-correct) !important;
-  color: var(--fg);
-}
-.cell.wrong {
-  background: var(--tap-wrong) !important;
-  color: var(--fg);
-}
-.cell.hint {
-  background: var(--tap-hint) !important;
-  color: var(--fg);
-}
+.cell.tapped { background: var(--tap); }
+.cell.correct { background: var(--tap-correct) !important; color: var(--fg); }
+.cell.wrong { background: var(--tap-wrong) !important; color: var(--fg); }
+.cell.hint { background: var(--tap-hint) !important; color: var(--fg); }
 
 /* Note labels */
 body.show-notes .cell.active-string {
@@ -350,9 +340,15 @@ body.show-notes .cell.active-string.is-root { color: var(--accent); font-weight:
   font-size: 14px;
   color: var(--fg-dim);
   opacity: 0.6;
+  z-index: 2;
 }
 .cell.fret-0.active-string::after { opacity: 1; color: var(--string-active); }
 body.show-notes .cell.fret-0::after { display: none; }
+
+/* The fret 0 (nut) column gets a thicker right border to look like the nut */
+.cell.fret-0, .fret-label.fret-0-label {
+  border-right: 3px solid var(--fg-dim);
+}
 
 /* ── Actions ───────────────────────────────── */
 .actions {

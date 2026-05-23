@@ -14,7 +14,7 @@ const CHORD_TYPES = {
   'm7':     { symbol: 'm7',    intervals: [0,3,7,10], labels: ['R','♭3','5','♭7'] },
   '7':      { symbol: '7',     intervals: [0,4,7,10], labels: ['R','3','5','♭7']  },
   'm7b5':   { symbol: 'm7♭5',  intervals: [0,3,6,10], labels: ['R','♭3','♭5','♭7']},
-  'dim7':   { symbol: '°7',    intervals: [0,3,6,9],  labels: ['R','♭3','♭5','♭♭7']},
+  'dim7':   { symbol: 'dim7',  intervals: [0,3,6,9],  labels: ['R','♭3','♭5','♭♭7']},
   'mMaj7':  { symbol: 'mMaj7', intervals: [0,3,7,11], labels: ['R','♭3','5','7']  },
   'maj7#5': { symbol: 'maj7♯5',intervals: [0,4,8,11], labels: ['R','3','♯5','7']  },
   '7#5':    { symbol: '7♯5',   intervals: [0,4,8,10], labels: ['R','3','♯5','♭7'] },
@@ -177,6 +177,35 @@ const streakEl = document.getElementById('streak');
 const correctEl = document.getElementById('correct');
 const totalEl = document.getElementById('total');
 const modeBtn = document.getElementById('modeBtn');
+const tonesToggle = document.getElementById('tonesToggle');
+const tonesPanel = document.getElementById('tonesPanel');
+
+let tonesOpen = false;
+
+function renderTonesPanel() {
+  if (!current) { tonesPanel.innerHTML = ''; return; }
+  const chips = current.chord.intervals.map((iv, idx) => {
+    const pc = (current.root + iv) % 12;
+    const note = noteName(pc);
+    const label = current.chord.labels[idx];
+    const isRoot = idx === 0;
+    return `<span class="tone-chip${isRoot ? ' is-root' : ''}">
+      <span class="tn-note">${note}</span>
+      <span class="tn-label">${label}</span>
+    </span>`;
+  }).join('');
+  tonesPanel.innerHTML = chips;
+}
+
+function setTonesOpen(open) {
+  tonesOpen = open;
+  tonesPanel.hidden = !open;
+  tonesToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  tonesToggle.textContent = open ? '구성음 숨기기' : '구성음 보기';
+  if (open) renderTonesPanel();
+}
+
+tonesToggle.addEventListener('click', () => setTonesOpen(!tonesOpen));
 
 function renderQuestion() {
   if (!current) {
@@ -194,12 +223,11 @@ function renderQuestion() {
   qStringLabel.textContent = 6 - current.stringIdx;
   qStringNote.textContent = noteName(STRING_OPEN_PC[current.stringIdx]);
   if (current.mode === 'A') {
-    qTone.textContent = `${current.toneLabel} (= ${noteName(current.targetPC)})`;
-    // Hide target note name from question until user wants it? For training keep symbolic only.
     qTone.textContent = current.toneLabel;
   }
   feedbackEl.textContent = '';
   feedbackEl.className = 'feedback';
+  if (tonesOpen) renderTonesPanel();
 }
 
 function updateScore() {

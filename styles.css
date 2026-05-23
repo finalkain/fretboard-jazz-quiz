@@ -120,6 +120,50 @@ body {
 body.mode-b .q-tone-wrap { display: none; }
 body.mode-b .q-tone-mode-b { display: inline; }
 
+.tones-toggle {
+  background: var(--bg-elev-2);
+  color: var(--accent);
+  border: 1px solid var(--fret-line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.tones-toggle[aria-expanded="true"] {
+  background: rgba(88, 166, 255, 0.18);
+  border-color: var(--accent-dim);
+}
+.tones-toggle:active { background: var(--accent-dim); color: white; }
+
+.tones-panel {
+  margin: 8px auto 0;
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  padding: 10px;
+  background: var(--bg-elev-2);
+  border-radius: 10px;
+  font-size: 14px;
+}
+.tone-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  background: var(--bg-elev);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--fret-line);
+}
+.tone-chip .tn-note { font-weight: 800; font-size: 16px; color: var(--fg); }
+.tone-chip .tn-label { color: var(--warn); font-weight: 700; font-size: 13px; }
+.tone-chip.is-root { border-color: var(--accent-dim); }
+.tone-chip.is-root .tn-label { color: var(--accent); }
+
 .q-detail {
   margin-top: 10px;
   font-size: 15px;

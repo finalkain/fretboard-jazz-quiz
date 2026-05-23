@@ -1,0 +1,26 @@
+{
+  "name": "Fretboard Jazz Quiz",
+  "short_name": "FretQuiz",
+  "description": "재즈 코드의 구성음을 기타 지판에서 찾는 퀴즈 (오프라인 지원)",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

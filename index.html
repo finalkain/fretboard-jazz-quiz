@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Fretboard Jazz Quiz</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <button id="settingsBtn" class="icon-btn" aria-label="설정">⚙</button>
+  <div class="score">
+    <span id="streak">0</span>
+    <span class="score-sep">·</span>
+    <span id="correct">0</span>/<span id="total">0</span>
+  </div>
+  <button id="modeBtn" class="mode-btn">A</button>
+</header>
+
+<section class="question">
+  <div class="q-chord"><span id="qRoot">—</span><span id="qType"></span></div>
+  <div class="q-detail">
+    <span class="q-string"><span id="qStringLabel">—</span>번 줄 <span class="q-string-note">(<span id="qStringNote">—</span>)</span></span>
+    <span class="q-tone-wrap" id="qToneWrap">
+      <span class="q-arrow">→</span>
+      <span class="q-tone" id="qTone">—</span>
+    </span>
+  </div>
+</section>
+
+<section class="fretboard-wrap">
+  <div class="fretboard" id="fretboard" aria-label="기타 지판"></div>
+</section>
+
+<section class="actions">
+  <div id="feedback" class="feedback"></div>
+  <button id="submitBtn" class="primary-btn" hidden>제출</button>
+  <button id="nextBtn" class="primary-btn">다음 문제</button>
+</section>
+
+<dialog id="settingsDialog" class="settings-dialog">
+  <form method="dialog">
+    <h2>설정</h2>
+
+    <div class="setting-group">
+      <h3>모드</h3>
+      <label class="radio"><input type="radio" name="mode" value="A" checked> A — 한 음 찾기</label>
+      <label class="radio"><input type="radio" name="mode" value="B"> B — 구성음 모두 찾기</label>
+    </div>
+
+    <div class="setting-group">
+      <h3>코드 타입</h3>
+      <div id="chordTypeList" class="chord-grid"></div>
+    </div>
+
+    <div class="setting-group">
+      <h3>옵션</h3>
+      <label class="checkbox"><input type="checkbox" id="optFlats"> ♭ 표기 우선</label>
+      <label class="checkbox"><input type="checkbox" id="optShowNotes"> 지판에 음이름 표시</label>
+      <label class="checkbox"><input type="checkbox" id="optAutoNext" checked> 정답 시 자동으로 다음 (모드 A)</label>
+      <label class="checkbox"><input type="checkbox" id="optHaptic" checked> 진동 피드백</label>
+      <label class="checkbox"><input type="checkbox" id="optHideStringNote"> 줄 옆 음이름 숨기기</label>
+    </div>
+
+    <div class="setting-group">
+      <h3>줄 범위</h3>
+      <div id="stringFilter" class="string-filter"></div>
+    </div>
+
+    <div class="dialog-actions">
+      <button value="close" class="primary-btn">닫기</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+}
+</script>
+</body>
+</html>

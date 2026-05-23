@@ -150,6 +150,7 @@ body.mode-b .q-tone-mode-b { display: inline; }
   border-radius: 10px;
   font-size: 14px;
 }
+.tones-panel[hidden] { display: none; }
 .tone-chip {
   display: inline-flex;
   align-items: baseline;

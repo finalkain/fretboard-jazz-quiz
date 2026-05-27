@@ -9,23 +9,109 @@ const NOTES_FLAT  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭',
 // Display label = 6 - index (so idx 0 → "6번 줄")
 const STRING_OPEN_PC = [4, 9, 2, 7, 11, 4]; // E A D G B E
 
+// `degrees` = letter positions (1=root letter, 3=skip-one letter, etc.)
+// Drives proper enharmonic spelling: a chord tone always lands on the
+// expected letter, accidental adjusts to hit the right pitch.
 const CHORD_TYPES = {
-  'maj7':   { symbol: 'maj7',  intervals: [0,4,7,11], labels: ['R','3','5','7']   },
-  'm7':     { symbol: 'm7',    intervals: [0,3,7,10], labels: ['R','♭3','5','♭7'] },
-  '7':      { symbol: '7',     intervals: [0,4,7,10], labels: ['R','3','5','♭7']  },
-  'm7b5':   { symbol: 'm7♭5',  intervals: [0,3,6,10], labels: ['R','♭3','♭5','♭7']},
-  'dim7':   { symbol: 'dim7',  intervals: [0,3,6,9],  labels: ['R','♭3','♭5','♭♭7']},
-  'mMaj7':  { symbol: 'mMaj7', intervals: [0,3,7,11], labels: ['R','♭3','5','7']  },
-  'maj7#5': { symbol: 'maj7♯5',intervals: [0,4,8,11], labels: ['R','3','♯5','7']  },
-  '7#5':    { symbol: '7♯5',   intervals: [0,4,8,10], labels: ['R','3','♯5','♭7'] },
-  '7b5':    { symbol: '7♭5',   intervals: [0,4,6,10], labels: ['R','3','♭5','♭7'] },
-  '7sus4':  { symbol: '7sus4', intervals: [0,5,7,10], labels: ['R','4','5','♭7']  },
+  'maj7':   { symbol: 'maj7',  intervals: [0,4,7,11], degrees: [1,3,5,7], labels: ['R','3','5','7']   },
+  'm7':     { symbol: 'm7',    intervals: [0,3,7,10], degrees: [1,3,5,7], labels: ['R','♭3','5','♭7'] },
+  '7':      { symbol: '7',     intervals: [0,4,7,10], degrees: [1,3,5,7], labels: ['R','3','5','♭7']  },
+  'm7b5':   { symbol: 'm7♭5',  intervals: [0,3,6,10], degrees: [1,3,5,7], labels: ['R','♭3','♭5','♭7']},
+  'dim7':   { symbol: 'dim7',  intervals: [0,3,6,9],  degrees: [1,3,5,7], labels: ['R','♭3','♭5','♭♭7']},
+  'mMaj7':  { symbol: 'mMaj7', intervals: [0,3,7,11], degrees: [1,3,5,7], labels: ['R','♭3','5','7']  },
+  'maj7#5': { symbol: 'maj7♯5',intervals: [0,4,8,11], degrees: [1,3,5,7], labels: ['R','3','♯5','7']  },
+  '7#5':    { symbol: '7♯5',   intervals: [0,4,8,10], degrees: [1,3,5,7], labels: ['R','3','♯5','♭7'] },
+  '7b5':    { symbol: '7♭5',   intervals: [0,4,6,10], degrees: [1,3,5,7], labels: ['R','3','♭5','♭7'] },
+  '7sus4':  { symbol: '7sus4', intervals: [0,5,7,10], degrees: [1,4,5,7], labels: ['R','4','5','♭7']  },
 };
+
+// ── Enharmonic spelling (music-theory correct) ────────
+// LETTERS[0..6] = A..G. LETTER_PC[i] = natural pitch class for that letter.
+const LETTERS = ['A','B','C','D','E','F','G'];
+const LETTER_PC = [9, 11, 0, 2, 4, 5, 7];
+
+// All reasonable spellings of each root pitch class as {letter idx, acc}.
+const ROOT_SPELLINGS = {
+  0:  [{letter:2,acc:0}],
+  1:  [{letter:2,acc:1}, {letter:3,acc:-1}],
+  2:  [{letter:3,acc:0}],
+  3:  [{letter:3,acc:1}, {letter:4,acc:-1}],
+  4:  [{letter:4,acc:0}],
+  5:  [{letter:5,acc:0}],
+  6:  [{letter:5,acc:1}, {letter:6,acc:-1}],
+  7:  [{letter:6,acc:0}],
+  8:  [{letter:6,acc:1}, {letter:0,acc:-1}],
+  9:  [{letter:0,acc:0}],
+  10: [{letter:0,acc:1}, {letter:1,acc:-1}],
+  11: [{letter:1,acc:0}],
+};
+
+function accidentalSymbol(acc) {
+  if (acc === 0) return '';
+  if (acc === 1) return '♯';
+  if (acc === 2) return '𝄪';
+  if (acc === -1) return '♭';
+  if (acc === -2) return '𝄫';
+  return acc > 0 ? '♯'.repeat(acc) : '♭'.repeat(-acc);
+}
+const spellingToString = (s) => LETTERS[s.letter] + accidentalSymbol(s.acc);
+
+// Spell a chord tone: given root letter + degree, fix the letter, adjust accidental.
+function spellChordTone(rootLetter, degree, intervalSemitones, rootPc) {
+  const letterIdx = (rootLetter + (degree - 1)) % 7;
+  const expectedPc = LETTER_PC[letterIdx];
+  const actualPc = (rootPc + intervalSemitones) % 12;
+  let acc = ((actualPc - expectedPc + 18) % 12) - 6; // range -6..5, typically -2..2
+  return { letter: letterIdx, acc };
+}
+
+// Score = total absolute accidentals; heavy penalty for double accidentals.
+// Small tiebreaker bias against sharps so when D♯ vs E♭ are equally clean,
+// E♭ wins (closer to traditional jazz fake-book spelling).
+function scoreSpelling(rootSpelling, chord, rootPc) {
+  let s = Math.abs(rootSpelling.acc);
+  if (rootSpelling.acc > 0) s += 0.1;
+  chord.intervals.forEach((iv, idx) => {
+    const t = spellChordTone(rootSpelling.letter, chord.degrees[idx], iv, rootPc);
+    s += Math.abs(t.acc);
+    if (Math.abs(t.acc) >= 2) s += 5;
+    if (t.acc > 0) s += 0.05;
+  });
+  return s;
+}
+
+// Pick the cleaner enharmonic root (D♯ vs E♭ etc.) per-chord, then derive tone spellings.
+function chordContext(rootPc, chord) {
+  const cands = ROOT_SPELLINGS[rootPc];
+  let best = cands[0];
+  let bestScore = scoreSpelling(best, chord, rootPc);
+  for (let i = 1; i < cands.length; i++) {
+    const s = scoreSpelling(cands[i], chord, rootPc);
+    if (s < bestScore) { best = cands[i]; bestScore = s; }
+  }
+  const toneSpellings = chord.intervals.map((iv, idx) =>
+    spellChordTone(best.letter, chord.degrees[idx], iv, rootPc)
+  );
+  const flats  = toneSpellings.filter(t => t.acc < 0).length + (best.acc < 0 ? 1 : 0);
+  const sharps = toneSpellings.filter(t => t.acc > 0).length + (best.acc > 0 ? 1 : 0);
+  return { rootSpelling: best, toneSpellings, usesFlat: flats > sharps };
+}
 
 const FRETS = 12;
 
-const noteName = (pc) => (settings.preferFlats ? NOTES_FLAT : NOTES_SHARP)[pc];
+const noteName = (pc, useFlat = settings.preferFlats) =>
+  (useFlat ? NOTES_FLAT : NOTES_SHARP)[pc];
 const fretPC = (stringIdx, fret) => (STRING_OPEN_PC[stringIdx] + fret) % 12;
+
+// Chord-context-aware spelling: if pc matches one of the current chord's
+// tones, use that tone's proper spelling (e.g., B♭ instead of A♯ in a
+// G♭maj7 context). Otherwise, fall back to the context's flat/sharp bias.
+function noteInContext(pc) {
+  if (!current || !current.ctx) return noteName(pc);
+  const idx = current.chord.intervals.findIndex(iv => (current.root + iv) % 12 === pc);
+  if (idx >= 0) return spellingToString(current.ctx.toneSpellings[idx]);
+  return noteName(pc, current.ctx.usesFlat);
+}
 
 // ── Persistent settings ───────────────────────
 const SETTINGS_KEY = 'fretquiz.settings.v1';
@@ -84,16 +170,19 @@ function generateQuestion() {
   const chord = CHORD_TYPES[key];
   const stringIdx = strs[Math.floor(Math.random() * strs.length)];
 
-  const q = { root, key, chord, stringIdx, mode: settings.mode };
+  const ctx = chordContext(root, chord);
+  const q = { root, key, chord, stringIdx, mode: settings.mode, ctx };
   if (settings.mode === 'A') {
-    const toneIdx = Math.floor(Math.random() * 4);
+    const toneIdx = Math.floor(Math.random() * chord.intervals.length);
     q.toneIdx = toneIdx;
     q.targetInterval = chord.intervals[toneIdx];
     q.targetPC = (root + q.targetInterval) % 12;
     q.toneLabel = chord.labels[toneIdx];
+    q.toneSpelling = ctx.toneSpellings[toneIdx];
   } else {
     q.targetPCs = chord.intervals.map(i => (root + i) % 12);
     q.toneLabels = chord.labels;
+    q.toneSpellings = ctx.toneSpellings;
   }
   return q;
 }
@@ -164,7 +253,7 @@ function updateFretboard() {
     if (s === current.stringIdx) {
       cell.classList.add('active-string');
       const pc = fretPC(s, f);
-      cell.textContent = noteName(pc);
+      cell.textContent = noteInContext(pc);
       if (pc === current.root) cell.classList.add('is-root');
     } else {
       cell.textContent = '';
@@ -262,8 +351,7 @@ function playChordTogether() {
 function renderTonesPanel() {
   if (!current) { tonesPanel.innerHTML = ''; return; }
   const chips = current.chord.intervals.map((iv, idx) => {
-    const pc = (current.root + iv) % 12;
-    const note = noteName(pc);
+    const note = spellingToString(current.ctx.toneSpellings[idx]);
     const label = current.chord.labels[idx];
     const isRoot = idx === 0;
     return `<button type="button" class="tone-chip${isRoot ? ' is-root' : ''}" data-idx="${idx}" aria-label="${note} ${label} 듣기">
@@ -313,7 +401,7 @@ function renderQuestion() {
     feedbackEl.className = 'feedback bad';
     return;
   }
-  qRoot.textContent = noteName(current.root);
+  qRoot.textContent = spellingToString(current.ctx.rootSpelling);
   qType.textContent = current.chord.symbol;
   qStringLabel.textContent = 6 - current.stringIdx;
   qStringNote.textContent = noteName(STRING_OPEN_PC[current.stringIdx]);
@@ -353,14 +441,14 @@ function onCellTap(e) {
       cell.classList.add('correct');
       stats.correct += 1;
       stats.streak += 1;
-      feedbackEl.textContent = `정답! ${noteName(pc)}`;
+      feedbackEl.textContent = `정답! ${noteInContext(pc)}`;
       feedbackEl.className = 'feedback good';
       vibrate(30);
       if (settings.autoNext) setTimeout(nextQuestion, 700);
     } else {
       cell.classList.add('wrong');
       stats.streak = 0;
-      feedbackEl.textContent = `오답. 정답은 ${noteName(current.targetPC)}.`;
+      feedbackEl.textContent = `오답. 정답은 ${spellingToString(current.toneSpelling)}.`;
       feedbackEl.className = 'feedback bad';
       vibrate([40, 60, 40]);
       // Show hints (all correct frets on this string)
@@ -411,13 +499,14 @@ function submitModeB() {
   if (missing.length === 0 && extra.length === 0) {
     stats.correct += 1;
     stats.streak += 1;
-    feedbackEl.textContent = `정답! ${current.targetPCs.map(pc => noteName(pc)).join(' / ')}`;
+    const names = current.toneSpellings.map(spellingToString).join(' / ');
+    feedbackEl.textContent = `정답! ${names}`;
     feedbackEl.className = 'feedback good';
     vibrate(30);
   } else {
     stats.streak = 0;
-    const miss = missing.map(noteName).join(', ');
-    const ex = extra.map(noteName).join(', ');
+    const miss = missing.map(noteInContext).join(', ');
+    const ex = extra.map(noteInContext).join(', ');
     let msg = '오답.';
     if (miss) msg += ` 누락: ${miss}.`;
     if (ex) msg += ` 잘못: ${ex}.`;

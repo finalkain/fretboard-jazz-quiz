@@ -159,11 +159,39 @@ body.mode-b .q-tone-mode-b { display: inline; }
   padding: 6px 10px;
   border-radius: 8px;
   border: 1px solid var(--fret-line);
+  color: var(--fg);
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 80ms ease, background 120ms ease;
 }
-.tone-chip .tn-note { font-weight: 800; font-size: 16px; color: var(--fg); }
+.tone-chip:hover { background: var(--bg-elev-2); }
+.tone-chip:active { transform: scale(0.94); background: var(--accent-dim); }
+.tone-chip .tn-note { font-weight: 800; font-size: 16px; }
 .tone-chip .tn-label { color: var(--warn); font-weight: 700; font-size: 13px; }
 .tone-chip.is-root { border-color: var(--accent-dim); }
 .tone-chip.is-root .tn-label { color: var(--accent); }
+
+.tones-play {
+  flex-basis: 100%;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.play-btn {
+  background: var(--accent-dim);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 80ms ease, background 120ms ease;
+}
+.play-btn:hover { background: var(--accent); }
+.play-btn:active { transform: scale(0.95); }
 
 .q-detail {
   margin-top: 10px;

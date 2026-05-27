@@ -194,6 +194,71 @@ const tonesPanel = document.getElementById('tonesPanel');
 
 let tonesOpen = false;
 
+// ── Audio synthesis (offline, Web Audio API) ──────────
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+const midiToFreq = (m) => 440 * Math.pow(2, (m - 69) / 12);
+
+// Soft pluck-like tone: triangle fundamental + sine octave through a
+// lowpass with an ADSR envelope. Sounds reasonably string-like.
+function playNote(midi, when = 0, duration = 1.2, vel = 0.28) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t0 = ctx.currentTime + when;
+  const freq = midiToFreq(midi);
+
+  const o1 = ctx.createOscillator();
+  o1.type = 'triangle'; o1.frequency.value = freq;
+  const o2 = ctx.createOscillator();
+  o2.type = 'sine'; o2.frequency.value = freq * 2;
+  const g1 = ctx.createGain(); g1.gain.value = vel;
+  const g2 = ctx.createGain(); g2.gain.value = vel * 0.3;
+
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = Math.min(8000, freq * 6);
+  lp.Q.value = 0.7;
+
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0.0001, t0);
+  env.gain.linearRampToValueAtTime(1, t0 + 0.008);
+  env.gain.exponentialRampToValueAtTime(0.55, t0 + 0.12);
+  env.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+
+  o1.connect(g1); g1.connect(env);
+  o2.connect(g2); g2.connect(env);
+  env.connect(lp); lp.connect(ctx.destination);
+
+  const stopAt = t0 + duration + 0.05;
+  o1.start(t0); o2.start(t0);
+  o1.stop(stopAt); o2.stop(stopAt);
+}
+
+// Octave so the chord sits around C3..B4 — pleasant range, no muddiness.
+const CHORD_BASE_MIDI = 48; // C3
+function currentChordMidis() {
+  if (!current) return [];
+  return current.chord.intervals.map((iv) => CHORD_BASE_MIDI + current.root + iv);
+}
+function playArpeggio() {
+  const midis = currentChordMidis();
+  const gap = 0.32;
+  midis.forEach((m, i) => playNote(m, i * gap, 0.55, 0.3));
+}
+function playChordTogether() {
+  const midis = currentChordMidis();
+  // Lower per-voice gain to avoid clipping when stacked.
+  midis.forEach((m) => playNote(m, 0, 1.6, 0.18));
+}
+
 function renderTonesPanel() {
   if (!current) { tonesPanel.innerHTML = ''; return; }
   const chips = current.chord.intervals.map((iv, idx) => {
@@ -201,12 +266,30 @@ function renderTonesPanel() {
     const note = noteName(pc);
     const label = current.chord.labels[idx];
     const isRoot = idx === 0;
-    return `<span class="tone-chip${isRoot ? ' is-root' : ''}">
+    return `<button type="button" class="tone-chip${isRoot ? ' is-root' : ''}" data-idx="${idx}" aria-label="${note} ${label} 듣기">
       <span class="tn-note">${note}</span>
       <span class="tn-label">${label}</span>
-    </span>`;
+    </button>`;
   }).join('');
-  tonesPanel.innerHTML = chips;
+  const controls = `<div class="tones-play">
+    <button type="button" class="play-btn" data-play="arp" aria-label="한 음씩 듣기">♪ 한 음씩</button>
+    <button type="button" class="play-btn" data-play="chord" aria-label="동시에 듣기">♬ 동시</button>
+  </div>`;
+  tonesPanel.innerHTML = chips + controls;
+
+  tonesPanel.querySelectorAll('.tone-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const idx = +chip.dataset.idx;
+      const iv = current.chord.intervals[idx];
+      playNote(CHORD_BASE_MIDI + current.root + iv, 0, 1.2, 0.32);
+    });
+  });
+  tonesPanel.querySelectorAll('.play-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.play === 'arp') playArpeggio();
+      else playChordTogether();
+    });
+  });
 }
 
 function setTonesOpen(open) {

@@ -822,13 +822,28 @@ function scaleNotesInBox() {
 
 function playScaleAsc() {
   const notes = scaleNotesInBox();
+  if (!notes.length) return;
+  const rootPc = scaleState.root;
+  // Start at the lowest root in the box (skip any tension/chord tone below it).
+  let startIdx = notes.findIndex(n => n.midi % 12 === rootPc);
+  if (startIdx < 0) startIdx = 0; // no root in this box — fall back to lowest note
+  const seq = notes.slice(startIdx);
   const gap = 0.22;
-  notes.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
+  seq.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
 }
 function playScaleDesc() {
-  const notes = scaleNotesInBox().reverse();
+  const notes = scaleNotesInBox();
+  if (!notes.length) return;
+  const rootPc = scaleState.root;
+  // Start at the highest root in the box (skip anything above it).
+  let endIdx = -1;
+  for (let i = notes.length - 1; i >= 0; i--) {
+    if (notes[i].midi % 12 === rootPc) { endIdx = i; break; }
+  }
+  if (endIdx < 0) endIdx = notes.length - 1;
+  const seq = notes.slice(0, endIdx + 1).reverse();
   const gap = 0.22;
-  notes.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
+  seq.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
 }
 function playScaleChord() {
   // Stack the scale's chord tones at C3 register

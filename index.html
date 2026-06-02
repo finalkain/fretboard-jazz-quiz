@@ -12,50 +12,124 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<header class="topbar">
-  <button id="settingsBtn" class="icon-btn" aria-label="설정">⚙</button>
-  <div class="score">
-    <span id="streak">0</span>
-    <span class="score-sep">·</span>
-    <span id="correct">0</span>/<span id="total">0</span>
-  </div>
-  <button id="helpBtn" class="icon-btn" aria-label="도움말">?</button>
-  <button id="modeBtn" class="mode-btn">A</button>
-</header>
+<body data-view="home">
 
-<section class="question">
-  <div class="q-prompt">
-    <span class="q-prompt-label">찾으세요:</span>
-    <span class="q-chord-inline"><span id="qRoot">—</span><span id="qType"></span></span>
-    <button id="tonesToggle" class="tones-toggle" type="button" aria-expanded="false">구성음 보기</button>
-    <br>
-    의 <span class="q-tone-wrap" id="qToneWrap"><span class="q-tone" id="qTone">—</span></span><span class="q-tone-mode-b" id="qAllTonesLabel">구성음 전부</span>
-  </div>
-  <div id="tonesPanel" class="tones-panel" hidden></div>
-  <div class="q-detail">
-    <span class="q-string-pill"><span id="qStringLabel">—</span>번 줄<span class="q-string-note"> (<span id="qStringNote">—</span>)</span></span>
-    <span class="q-instr">에서 탭하세요</span>
-  </div>
-</section>
+<!-- ── HOME ─────────────────────────────────────────── -->
+<div class="view" id="view-home">
+  <header class="topbar">
+    <span class="topbar-title">Fretboard Jazz</span>
+    <button id="homeHelpBtn" class="icon-btn" aria-label="도움말">?</button>
+  </header>
+  <main class="home-grid">
+    <button class="menu-card" data-go="quiz" type="button">
+      <span class="card-icon">🎸</span>
+      <span class="card-title">코드 맞추기</span>
+      <span class="card-sub">재즈 코드의 구성음을 지판에서 찾기</span>
+    </button>
+    <button class="menu-card" data-go="scales" type="button">
+      <span class="card-icon">🎼</span>
+      <span class="card-title">스케일 보기</span>
+      <span class="card-sub">CAGED 5가지 모양으로 스케일 학습</span>
+    </button>
+  </main>
+</div>
 
-<section class="fretboard-wrap">
-  <div class="fretboard-legend">
-    <span>← 0프렛(개방) · 12프렛 →</span>
-    <span>위=6번(저음 E) · 아래=1번(고음 E)</span>
-  </div>
-  <div class="fretboard" id="fretboard" aria-label="기타 지판"></div>
-</section>
+<!-- ── QUIZ ─────────────────────────────────────────── -->
+<div class="view" id="view-quiz">
+  <header class="topbar">
+    <button class="icon-btn" data-back aria-label="메인으로">←</button>
+    <button id="settingsBtn" class="icon-btn" aria-label="설정">⚙</button>
+    <div class="score">
+      <span id="streak">0</span>
+      <span class="score-sep">·</span>
+      <span id="correct">0</span>/<span id="total">0</span>
+    </div>
+    <button id="helpBtn" class="icon-btn" aria-label="도움말">?</button>
+    <button id="modeBtn" class="mode-btn">A</button>
+  </header>
 
-<section class="actions">
-  <div id="feedback" class="feedback"></div>
-  <button id="submitBtn" class="primary-btn" hidden>제출</button>
-  <button id="nextBtn" class="primary-btn">다음 문제</button>
-</section>
+  <section class="question">
+    <div class="q-prompt">
+      <span class="q-prompt-label">찾으세요:</span>
+      <span class="q-chord-inline"><span id="qRoot">—</span><span id="qType"></span></span>
+      <button id="tonesToggle" class="tones-toggle" type="button" aria-expanded="false">구성음 보기</button>
+      <br>
+      의 <span class="q-tone-wrap" id="qToneWrap"><span class="q-tone" id="qTone">—</span></span><span class="q-tone-mode-b" id="qAllTonesLabel">구성음 전부</span>
+    </div>
+    <div id="tonesPanel" class="tones-panel" hidden></div>
+    <div class="q-detail">
+      <span class="q-string-pill"><span id="qStringLabel">—</span>번 줄<span class="q-string-note"> (<span id="qStringNote">—</span>)</span></span>
+      <span class="q-instr">에서 탭하세요</span>
+    </div>
+  </section>
 
+  <section class="fretboard-wrap">
+    <div class="fretboard-legend">
+      <span>← 0프렛(개방) · 12프렛 →</span>
+      <span>위=6번(저음 E) · 아래=1번(고음 E)</span>
+    </div>
+    <div class="fretboard" id="fretboard" aria-label="기타 지판"></div>
+  </section>
+
+  <section class="actions">
+    <div id="feedback" class="feedback"></div>
+    <button id="submitBtn" class="primary-btn" hidden>제출</button>
+    <button id="nextBtn" class="primary-btn">다음 문제</button>
+  </section>
+</div>
+
+<!-- ── SCALES ───────────────────────────────────────── -->
+<div class="view" id="view-scales">
+  <header class="topbar">
+    <button class="icon-btn" data-back aria-label="메인으로">←</button>
+    <span class="topbar-title">스케일</span>
+    <button id="scaleHelpBtn" class="icon-btn" aria-label="도움말">?</button>
+  </header>
+
+  <section class="scale-pickers">
+    <div class="picker-group">
+      <div class="picker-label">루트</div>
+      <div id="scaleRootList" class="chip-row"></div>
+    </div>
+    <div class="picker-group">
+      <div class="picker-label">스케일</div>
+      <div id="scaleTypeList" class="chip-row scrollx"></div>
+    </div>
+    <div class="picker-group">
+      <div class="picker-label">CAGED 모양</div>
+      <div id="scaleShapeList" class="chip-row shape-row"></div>
+    </div>
+  </section>
+
+  <section class="scale-summary">
+    <span id="scaleSummary" class="scale-summary-text">—</span>
+    <span class="scale-legend">
+      <span class="legend-dot dot-root"></span>R
+      <span class="legend-dot dot-chord"></span>코드톤
+      <span class="legend-dot dot-tension"></span>텐션
+      <span class="legend-dot dot-avoid"></span>어보이드
+    </span>
+  </section>
+
+  <section class="fretboard-wrap">
+    <div class="fretboard-legend">
+      <span>← 0프렛 · 12프렛 →</span>
+      <span>위=6번 · 아래=1번</span>
+    </div>
+    <div class="fretboard" id="scaleFretboard" aria-label="스케일 지판"></div>
+  </section>
+
+  <section class="scale-actions">
+    <button id="scaleAscBtn" class="primary-btn">♪ 상행</button>
+    <button id="scaleDescBtn" class="primary-btn">♪ 하행</button>
+    <button id="scaleChordBtn" class="primary-btn ghost">♬ 동시</button>
+  </section>
+</div>
+
+<!-- ── Dialogs ──────────────────────────────────────── -->
 <dialog id="helpDialog" class="settings-dialog">
   <form method="dialog">
-    <h2>풀이 방법</h2>
+    <h2>풀이 방법 (코드 맞추기)</h2>
     <ol class="help-list">
       <li>상단에 출제된 <b>코드 + 찾을 음</b>(예: <i>Cmaj7의 ♭3</i>)을 확인합니다.</li>
       <li>지정된 <b>줄(string)</b>이 지판에서 파란색으로 강조됩니다. 해당 줄에서만 탭할 수 있어요.</li>
@@ -64,15 +138,32 @@
       <li><b>모드 B</b>: 그 줄에서 코드의 <b>모든 구성음(4개)</b>을 탭한 뒤 <b>제출</b>을 누릅니다.</li>
     </ol>
     <p class="help-note">
-      💡 <b>줄 번호 규칙</b>: 6번 줄 = 가장 굵은 저음 E, 1번 줄 = 가장 가는 고음 E. 지판은 위에서 내려다본 시점으로, 왼쪽이 6번 줄입니다.<br>
-      💡 코드 이름 옆 <b>"구성음 보기"</b> 버튼을 누르면 음 이름과 인터벌(R / 3 / 5 / 7 등)을 확인할 수 있고, 각 칩을 탭하면 그 음만, <b>♪ 한 음씩</b> / <b>♬ 동시</b> 버튼으로 아르페지오/코드 사운드를 들을 수 있습니다.<br>
-      💡 음이름은 <b>화성학 표기 자동</b>: 코드마다 알파벳이 한 글자씩 떨어지고 더블 ♯/♭ 가 최소화되는 표기로 선택됩니다 (예: G♭maj7 = G♭ B♭ D♭ F, F♯m7 = F♯ A C♯ E).<br>
-      💡 처음에는 ⚙ 설정에서 "지판에 음이름 표시"를 켜두고 익히는 것을 권장합니다.<br>
-      💡 오답이면 정답 위치가 노란색으로 표시됩니다.<br>
-      💡 <b>코드 기호 참고</b>: <code>maj7</code>=장7, <code>m7</code>=단7, <code>7</code>=도미넌트, <code>m7♭5</code>=반감(ø), <code>dim7</code>=감(°), <code>mMaj7</code>=마이너 메이저7, <code>♯5</code>=증5도.
+      💡 코드 이름 옆 <b>"구성음 보기"</b> 버튼: 각 칩 탭 = 그 음만, <b>♪ 한 음씩</b> / <b>♬ 동시</b> 버튼으로 아르페지오/코드 사운드.<br>
+      💡 음이름은 <b>화성학 표기 자동</b> (예: G♭maj7 = G♭ B♭ D♭ F).<br>
+      💡 오답이면 정답 위치가 노란색으로 표시됩니다.
     </p>
     <div class="dialog-actions">
       <button value="close" class="primary-btn">시작</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="scaleHelpDialog" class="settings-dialog">
+  <form method="dialog">
+    <h2>스케일 보기</h2>
+    <ol class="help-list">
+      <li><b>루트</b>를 선택합니다 (12개).</li>
+      <li><b>스케일</b> 종류를 선택합니다 (메이저, 마이너 3종, 모드, 얼터드, 펜타토닉 등).</li>
+      <li><b>CAGED 모양</b>(C·A·G·E·D)을 선택하면 그 박스 위치에서의 스케일이 지판에 표시됩니다.</li>
+      <li><b>♪ 상행/하행</b>으로 박스 내 음들을 순차 재생, <b>♬ 동시</b>로 다 같이 재생.</li>
+      <li>스케일 음 색상: <b>루트</b>=파랑(큰 점), <b>코드톤(1·3·5·7)</b>=청록, <b>텐션</b>=노랑, <b>어보이드</b>=빨강(X 표시·흐림).</li>
+    </ol>
+    <p class="help-note">
+      💡 CAGED는 각 메이저 코드 모양(C·A·G·E·D)이 지판 위에 차례로 자리잡는 5개의 박스를 말합니다. 박스를 옮기면 같은 스케일을 다른 운지로 볼 수 있어요.<br>
+      💡 어보이드 노트는 화성학 맥락에서 "그 코드 위에서 길게 끌면 안 좋은 음"입니다 — 지나가는 패스 톤으로는 OK.
+    </p>
+    <div class="dialog-actions">
+      <button value="close" class="primary-btn">닫기</button>
     </div>
   </form>
 </dialog>
@@ -94,7 +185,7 @@
 
     <div class="setting-group">
       <h3>옵션</h3>
-      <label class="checkbox"><input type="checkbox" id="optFlats"> ♭ 표기 우선</label>
+      <label class="checkbox"><input type="checkbox" id="optFlats"> ♭ 표기 우선 (비코드 음 fallback)</label>
       <label class="checkbox"><input type="checkbox" id="optShowNotes"> 지판에 음이름 표시</label>
       <label class="checkbox"><input type="checkbox" id="optAutoNext" checked> 정답 시 자동으로 다음 (모드 A)</label>
       <label class="checkbox"><input type="checkbox" id="optHaptic" checked> 진동 피드백</label>
@@ -123,7 +214,6 @@ if ('serviceWorker' in navigator) {
   });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
-      // Check for an update on every load.
       reg.update().catch(() => {});
     });
   });

@@ -25,6 +25,36 @@ const CHORD_TYPES = {
   '7sus4':  { symbol: '7sus4', intervals: [0,5,7,10], degrees: [1,4,5,7], labels: ['R','4','5','♭7']  },
 };
 
+// ── Scales (intervals + degrees + role classification) ─
+// degree numbers drive enharmonic letter selection (same engine as chords).
+// roleByDegree: 'chord' (R/3/5/7), 'tension' (2/4/6), 'avoid' (per-scale).
+const SCALES = {
+  'major':      { name: '메이저 (Ionian)',           intervals:[0,2,4,5,7,9,11], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[4]   },
+  'lydian':     { name: '리디안',                    intervals:[0,2,4,6,7,9,11], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[]    },
+  'mixolydian': { name: '믹솔리디안',                intervals:[0,2,4,5,7,9,10], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[4]   },
+  'natminor':   { name: '내추럴 마이너 (Aeolian)',   intervals:[0,2,3,5,7,8,10], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[6]   },
+  'harmonic':   { name: '하모닉 마이너',             intervals:[0,2,3,5,7,8,11], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[6]   },
+  'melodic':    { name: '멜로딕 마이너',             intervals:[0,2,3,5,7,9,11], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[]    },
+  'dorian':     { name: '도리안',                    intervals:[0,2,3,5,7,9,10], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[]    },
+  'phrygian':   { name: '프리지안',                  intervals:[0,1,3,5,7,8,10], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[2,6] },
+  'locrian':    { name: '로크리안',                  intervals:[0,1,3,5,6,8,10], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[2]   },
+  'altered':    { name: '얼터드 (Super Locrian)',    intervals:[0,1,3,4,6,8,10], degrees:[1,2,3,4,5,6,7], chordTones:[1,3,5,7], avoid:[]    },
+  'majpent':    { name: '메이저 펜타토닉',           intervals:[0,2,4,7,9],      degrees:[1,2,3,5,6],     chordTones:[1,3,5],   avoid:[]    },
+  'minpent':    { name: '마이너 펜타토닉',           intervals:[0,3,5,7,10],     degrees:[1,3,4,5,7],     chordTones:[1,3,5,7], avoid:[]    },
+  'blues':      { name: '블루스',                    intervals:[0,3,5,6,7,10],   degrees:[1,3,4,5,5,7],   chordTones:[1,3,5,7], avoid:[]    },
+};
+
+// CAGED shape boxes — each shape anchors on one string; box spans
+// [anchorFret + offsetMin, anchorFret + offsetMax] around the root.
+// 0 = string 6 (low E), 1 = string 5 (A), 2 = string 4 (D).
+const CAGED_SHAPES = {
+  C: { name: 'C', anchorString: 1, offsetMin: -3, offsetMax: 2 },
+  A: { name: 'A', anchorString: 1, offsetMin: -1, offsetMax: 2 },
+  G: { name: 'G', anchorString: 0, offsetMin: -3, offsetMax: 0 },
+  E: { name: 'E', anchorString: 0, offsetMin: -1, offsetMax: 2 },
+  D: { name: 'D', anchorString: 2, offsetMin: -1, offsetMax: 2 },
+};
+
 // ── Enharmonic spelling (music-theory correct) ────────
 // LETTERS[0..6] = A..G. LETTER_PC[i] = natural pitch class for that letter.
 const LETTERS = ['A','B','C','D','E','F','G'];
@@ -190,19 +220,20 @@ function generateQuestion() {
 // ── Fretboard rendering ───────────────────────
 const fretboardEl = document.getElementById('fretboard');
 
-function buildFretboard() {
-  fretboardEl.innerHTML = '';
+// Generic fretboard grid builder — used by both quiz and scale views.
+function buildFretboardGrid(rootEl, onCellClick) {
+  rootEl.innerHTML = '';
 
   // Row 1: corner + fret labels (frets 0..12 left→right)
   const corner = document.createElement('div');
   corner.className = 'fret-label corner';
-  fretboardEl.appendChild(corner);
+  rootEl.appendChild(corner);
   for (let f = 0; f <= FRETS; f++) {
     const lbl = document.createElement('div');
     lbl.className = 'fret-label';
     if (f === 0) lbl.classList.add('fret-0-label');
     lbl.textContent = f;
-    fretboardEl.appendChild(lbl);
+    rootEl.appendChild(lbl);
   }
 
   // Rows 2..7: for each string (idx 0 = string 6 / low E on top), label then 13 cells
@@ -211,22 +242,19 @@ function buildFretboard() {
     h.className = 'string-header';
     h.dataset.string = s;
     h.textContent = `${6 - s}`;
-    fretboardEl.appendChild(h);
+    rootEl.appendChild(h);
 
     for (let f = 0; f <= FRETS; f++) {
       const cell = document.createElement('div');
       cell.className = `cell fret-${f}`;
       cell.dataset.string = s;
       cell.dataset.fret = f;
-      cell.addEventListener('click', onCellTap);
-      fretboardEl.appendChild(cell);
+      if (onCellClick) cell.addEventListener('click', onCellClick);
+      rootEl.appendChild(cell);
     }
   }
 
-  // Inlay dots — positioned ABSOLUTELY so they don't disturb grid auto-flow.
-  // Label col is 32px wide, header row 22px tall.
-  // Fret X center: 32px + (containerW - 32px) * (X + 0.5) / 13
-  // String-boundary Y (between idx I-1 and I, counting from top): 22px + (containerH - 22px) * I / 6
+  // Inlay dots — absolutely positioned so they don't disturb grid auto-flow.
   const fretCenter = (f) => `calc(32px + (100% - 32px) * ${f + 0.5} / 13)`;
   const stringBoundary = (i) => `calc(22px + (100% - 22px) * ${i} / 6)`;
   const addInlay = (f, boundaryIdx) => {
@@ -234,14 +262,14 @@ function buildFretboard() {
     d.className = 'inlay-dot';
     d.style.left = fretCenter(f);
     d.style.top = stringBoundary(boundaryIdx);
-    fretboardEl.appendChild(d);
+    rootEl.appendChild(d);
   };
-  // Single dots: between strings 4 (idx 2) and 3 (idx 3) → boundary idx = 3
   [3, 5, 7, 9].forEach(f => addInlay(f, 3));
-  // Fret 12 double: between strings 5-4 (boundary 2) and strings 3-2 (boundary 4)
   addInlay(12, 2);
   addInlay(12, 4);
 }
+
+function buildFretboard() { buildFretboardGrid(fretboardEl, onCellTap); }
 
 function updateFretboard() {
   if (!current) return;
@@ -624,14 +652,8 @@ function openHelp() {
 }
 document.getElementById('helpBtn').addEventListener('click', openHelp);
 
-// Auto-show help on first visit
+// Auto-show quiz help the first time the user enters the quiz view
 const FIRST_RUN_KEY = 'fretquiz.seen.help.v1';
-if (!localStorage.getItem(FIRST_RUN_KEY)) {
-  setTimeout(() => {
-    openHelp();
-    localStorage.setItem(FIRST_RUN_KEY, '1');
-  }, 200);
-}
 
 modeBtn.addEventListener('click', () => {
   settings.mode = settings.mode === 'A' ? 'B' : 'A';
@@ -644,12 +666,246 @@ modeBtn.addEventListener('click', () => {
 nextBtn.addEventListener('click', nextQuestion);
 submitBtn.addEventListener('click', submitModeB);
 
-// Init
+// ── Scale viewer ──────────────────────────────
+// MIDI for open strings (low E to high E)
+const STRING_OPEN_MIDI = [40, 45, 50, 55, 59, 64];
+
+let scaleState = {
+  root: 0,           // C
+  scale: 'major',
+  shape: 'E',
+};
+
+const scaleFretboardEl = document.getElementById('scaleFretboard');
+const scaleRootList = document.getElementById('scaleRootList');
+const scaleTypeList = document.getElementById('scaleTypeList');
+const scaleShapeList = document.getElementById('scaleShapeList');
+const scaleSummaryEl = document.getElementById('scaleSummary');
+
+function computeBox(rootPc, shapeKey) {
+  if (shapeKey === 'ALL') return { start: 0, end: 12 };
+  const sh = CAGED_SHAPES[shapeKey];
+  if (!sh) return { start: 0, end: 12 };
+  const open = STRING_OPEN_PC[sh.anchorString];
+  let anchorFret = (rootPc - open + 12) % 12;
+  let start = anchorFret + sh.offsetMin;
+  let end   = anchorFret + sh.offsetMax;
+  if (start < 0) {
+    const shift = Math.ceil(-start / 12) * 12;
+    start += shift; end += shift;
+  }
+  return { start: Math.max(0, start), end: Math.min(FRETS, end) };
+}
+
+function classifyTone(scale, idx) {
+  if (idx === 0) return 'root';
+  const deg = scale.degrees[idx];
+  if (scale.avoid.includes(deg)) return 'avoid';
+  if (scale.chordTones.includes(deg)) return 'chord';
+  return 'tension';
+}
+
+function onScaleCellTap(e) {
+  const s = +e.currentTarget.dataset.string;
+  const f = +e.currentTarget.dataset.fret;
+  playNote(STRING_OPEN_MIDI[s] + f, 0, 0.9, 0.32);
+}
+
+function renderScaleViewer() {
+  const scale = SCALES[scaleState.scale];
+  const ctx = chordContext(scaleState.root, scale);
+  const box = computeBox(scaleState.root, scaleState.shape);
+
+  const cells = scaleFretboardEl.querySelectorAll('.cell');
+  cells.forEach(cell => {
+    const s = +cell.dataset.string;
+    const f = +cell.dataset.fret;
+    cell.classList.remove('scale-note','note-root','note-chord','note-tension','note-avoid','in-box');
+    cell.textContent = '';
+    const pc = fretPC(s, f);
+    const idx = scale.intervals.findIndex(iv => (scaleState.root + iv) % 12 === pc);
+    if (idx >= 0) {
+      const role = classifyTone(scale, idx);
+      cell.classList.add('scale-note', `note-${role}`);
+      cell.textContent = spellingToString(ctx.toneSpellings[idx]);
+    }
+    if (f >= box.start && f <= box.end) cell.classList.add('in-box');
+  });
+
+  renderRootPicker();
+  scaleSummaryEl.textContent =
+    `${spellingToString(ctx.rootSpelling)} ${scale.name} · ${scaleState.shape === 'ALL' ? '전체' : scaleState.shape + '형'}`;
+}
+
+function renderRootPicker() {
+  if (!scaleRootList.children.length) {
+    for (let pc = 0; pc < 12; pc++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pick-chip';
+      btn.dataset.pc = pc;
+      btn.addEventListener('click', () => {
+        scaleState.root = pc;
+        renderScaleViewer();
+      });
+      scaleRootList.appendChild(btn);
+    }
+  }
+  const scale = SCALES[scaleState.scale];
+  scaleRootList.querySelectorAll('.pick-chip').forEach(btn => {
+    const pc = +btn.dataset.pc;
+    const ctx = chordContext(pc, scale);
+    btn.textContent = spellingToString(ctx.rootSpelling);
+    btn.classList.toggle('on', pc === scaleState.root);
+  });
+}
+
+function renderScalePicker() {
+  if (!scaleTypeList.children.length) {
+    Object.entries(SCALES).forEach(([key, def]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pick-chip';
+      btn.dataset.scale = key;
+      btn.textContent = def.name;
+      btn.addEventListener('click', () => {
+        scaleState.scale = key;
+        renderScalePicker();
+        renderScaleViewer();
+      });
+      scaleTypeList.appendChild(btn);
+    });
+  }
+  scaleTypeList.querySelectorAll('.pick-chip').forEach(btn => {
+    btn.classList.toggle('on', btn.dataset.scale === scaleState.scale);
+  });
+}
+
+function renderShapePicker() {
+  if (!scaleShapeList.children.length) {
+    ['C','A','G','E','D','ALL'].forEach(key => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pick-chip';
+      btn.dataset.shape = key;
+      btn.textContent = key === 'ALL' ? '전체' : key;
+      btn.addEventListener('click', () => {
+        scaleState.shape = key;
+        renderShapePicker();
+        renderScaleViewer();
+      });
+      scaleShapeList.appendChild(btn);
+    });
+  }
+  scaleShapeList.querySelectorAll('.pick-chip').forEach(btn => {
+    btn.classList.toggle('on', btn.dataset.shape === scaleState.shape);
+  });
+}
+
+function scaleNotesInBox() {
+  const scale = SCALES[scaleState.scale];
+  const box = computeBox(scaleState.root, scaleState.shape);
+  const notes = [];
+  for (let s = 0; s < 6; s++) {
+    for (let f = box.start; f <= box.end; f++) {
+      const pc = fretPC(s, f);
+      if (scale.intervals.some(iv => (scaleState.root + iv) % 12 === pc)) {
+        notes.push({ s, f, midi: STRING_OPEN_MIDI[s] + f });
+      }
+    }
+  }
+  notes.sort((a, b) => a.midi - b.midi);
+  // dedupe by midi (same pitch played on different strings)
+  const seen = new Set();
+  return notes.filter(n => seen.has(n.midi) ? false : (seen.add(n.midi), true));
+}
+
+function playScaleAsc() {
+  const notes = scaleNotesInBox();
+  const gap = 0.22;
+  notes.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
+}
+function playScaleDesc() {
+  const notes = scaleNotesInBox().reverse();
+  const gap = 0.22;
+  notes.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
+}
+function playScaleChord() {
+  // Stack the scale's chord tones at C3 register
+  const scale = SCALES[scaleState.scale];
+  const root = scaleState.root;
+  scale.chordTones.forEach(deg => {
+    const idx = scale.degrees.findIndex(d => d === deg);
+    if (idx < 0) return;
+    const iv = scale.intervals[idx];
+    playNote(CHORD_BASE_MIDI + root + iv, 0, 1.6, 0.18);
+  });
+}
+
+let scaleViewerInited = false;
+function initScaleViewer() {
+  if (scaleViewerInited) return;
+  scaleViewerInited = true;
+  buildFretboardGrid(scaleFretboardEl, onScaleCellTap);
+  renderRootPicker();
+  renderScalePicker();
+  renderShapePicker();
+  renderScaleViewer();
+}
+
+document.getElementById('scaleAscBtn').addEventListener('click', playScaleAsc);
+document.getElementById('scaleDescBtn').addEventListener('click', playScaleDesc);
+document.getElementById('scaleChordBtn').addEventListener('click', playScaleChord);
+
+const scaleHelpDialog = document.getElementById('scaleHelpDialog');
+document.getElementById('scaleHelpBtn').addEventListener('click', () => {
+  if (typeof scaleHelpDialog.showModal === 'function') scaleHelpDialog.showModal();
+  else scaleHelpDialog.setAttribute('open', '');
+});
+document.getElementById('homeHelpBtn').addEventListener('click', openHelp);
+
+// ── View navigation ───────────────────────────
+const VALID_VIEWS = ['home','quiz','scales'];
+function setView(name) {
+  if (!VALID_VIEWS.includes(name)) name = 'home';
+  document.body.dataset.view = name;
+  if (name === 'scales') initScaleViewer();
+  if (name === 'quiz' && !localStorage.getItem(FIRST_RUN_KEY)) {
+    setTimeout(() => { openHelp(); localStorage.setItem(FIRST_RUN_KEY, '1'); }, 200);
+  }
+}
+document.querySelectorAll('[data-go]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.go;
+    history.pushState({ view: t }, '', '#' + t);
+    setView(t);
+  });
+});
+document.querySelectorAll('[data-back]').forEach(btn => {
+  btn.addEventListener('click', () => history.back());
+});
+window.addEventListener('popstate', (e) => {
+  const view = (e.state && e.state.view) || location.hash.slice(1) || 'home';
+  setView(view);
+});
+
+// ── Init ─────────────────────────────────────
 buildFretboard();
 applyModeUI();
 applyOptionUI();
 syncSettingsUI();
 updateScore();
 nextQuestion();
+
+// Resolve initial route from URL hash
+{
+  const initialView = location.hash.slice(1);
+  if (initialView && VALID_VIEWS.includes(initialView) && initialView !== 'home') {
+    history.replaceState({ view: initialView }, '', '#' + initialView);
+    setView(initialView);
+  } else {
+    setView('home');
+  }
+}
 
 })();

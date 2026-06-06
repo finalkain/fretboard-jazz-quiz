@@ -666,21 +666,19 @@ modeBtn.addEventListener('click', () => {
 nextBtn.addEventListener('click', nextQuestion);
 submitBtn.addEventListener('click', submitModeB);
 
-// ── Scale viewer ──────────────────────────────
+// ── Scale viewer ──────────────────────────────────
 // MIDI for open strings (low E to high E)
 const STRING_OPEN_MIDI = [40, 45, 50, 55, 59, 64];
 
-let scaleState = {
-  root: 0,           // C
-  scale: 'major',
-  shape: 'E',
-};
+// Shared state — both views read from this
+let scaleState = { root: 0, scale: 'major', shape: 'E' };
 
+// Scale view DOM refs
 const scaleFretboardEl = document.getElementById('scaleFretboard');
-const scaleRootList = document.getElementById('scaleRootList');
-const scaleTypeList = document.getElementById('scaleTypeList');
-const scaleShapeList = document.getElementById('scaleShapeList');
-const scaleSummaryEl = document.getElementById('scaleSummary');
+const scaleRootList    = document.getElementById('scaleRootList');
+const scaleTypeList    = document.getElementById('scaleTypeList');
+const scaleShapeList   = document.getElementById('scaleShapeList');
+const scaleSummaryEl   = document.getElementById('scaleSummary');
 
 function computeBox(rootPc, shapeKey) {
   if (shapeKey === 'ALL') return { start: 0, end: 12 };
@@ -705,6 +703,7 @@ function classifyTone(scale, idx) {
   return 'tension';
 }
 
+// ── Scale view: original grid fretboard ───────────
 function onScaleCellTap(e) {
   const s = +e.currentTarget.dataset.string;
   const f = +e.currentTarget.dataset.fret;
@@ -713,16 +712,15 @@ function onScaleCellTap(e) {
 
 function renderScaleViewer() {
   const scale = SCALES[scaleState.scale];
-  const ctx = chordContext(scaleState.root, scale);
-  const box = computeBox(scaleState.root, scaleState.shape);
+  const ctx   = chordContext(scaleState.root, scale);
+  const box   = computeBox(scaleState.root, scaleState.shape);
 
-  const cells = scaleFretboardEl.querySelectorAll('.cell');
-  cells.forEach(cell => {
+  scaleFretboardEl.querySelectorAll('.cell').forEach(cell => {
     const s = +cell.dataset.string;
     const f = +cell.dataset.fret;
     cell.classList.remove('scale-note','note-root','note-chord','note-tension','note-avoid','in-box');
     cell.textContent = '';
-    const pc = fretPC(s, f);
+    const pc  = fretPC(s, f);
     const idx = scale.intervals.findIndex(iv => (scaleState.root + iv) % 12 === pc);
     if (idx >= 0) {
       const role = classifyTone(scale, idx);
@@ -737,85 +735,72 @@ function renderScaleViewer() {
     `${spellingToString(ctx.rootSpelling)} ${scale.name} · ${scaleState.shape === 'ALL' ? '전체' : scaleState.shape + '형'}`;
 }
 
-function renderRootPicker() {
-  if (!scaleRootList.children.length) {
+// ── Generic picker helpers ─────────────────────────
+// Build buttons in a container only if empty, then sync selection state.
+function buildRootPickerIn(container, onPick) {
+  if (!container.children.length) {
     for (let pc = 0; pc < 12; pc++) {
       const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'pick-chip';
-      btn.dataset.pc = pc;
-      btn.addEventListener('click', () => {
-        scaleState.root = pc;
-        renderScaleViewer();
-      });
-      scaleRootList.appendChild(btn);
+      btn.type = 'button'; btn.className = 'pick-chip'; btn.dataset.pc = pc;
+      btn.addEventListener('click', () => onPick(pc));
+      container.appendChild(btn);
     }
   }
   const scale = SCALES[scaleState.scale];
-  scaleRootList.querySelectorAll('.pick-chip').forEach(btn => {
-    const pc = +btn.dataset.pc;
-    const ctx = chordContext(pc, scale);
-    btn.textContent = spellingToString(ctx.rootSpelling);
+  container.querySelectorAll('.pick-chip').forEach(btn => {
+    const pc  = +btn.dataset.pc;
+    btn.textContent = spellingToString(chordContext(pc, scale).rootSpelling);
     btn.classList.toggle('on', pc === scaleState.root);
   });
 }
 
-function renderScalePicker() {
-  if (!scaleTypeList.children.length) {
+function buildScalePickerIn(container, onPick) {
+  if (!container.children.length) {
     Object.entries(SCALES).forEach(([key, def]) => {
       const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'pick-chip';
-      btn.dataset.scale = key;
+      btn.type = 'button'; btn.className = 'pick-chip'; btn.dataset.scale = key;
       btn.textContent = def.name;
-      btn.addEventListener('click', () => {
-        scaleState.scale = key;
-        renderScalePicker();
-        renderScaleViewer();
-      });
-      scaleTypeList.appendChild(btn);
+      btn.addEventListener('click', () => onPick(key));
+      container.appendChild(btn);
     });
   }
-  scaleTypeList.querySelectorAll('.pick-chip').forEach(btn => {
-    btn.classList.toggle('on', btn.dataset.scale === scaleState.scale);
-  });
+  container.querySelectorAll('.pick-chip').forEach(btn =>
+    btn.classList.toggle('on', btn.dataset.scale === scaleState.scale));
 }
 
-function renderShapePicker() {
-  if (!scaleShapeList.children.length) {
+function buildShapePickerIn(container, onPick) {
+  if (!container.children.length) {
     ['C','A','G','E','D','ALL'].forEach(key => {
       const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'pick-chip';
-      btn.dataset.shape = key;
+      btn.type = 'button'; btn.className = 'pick-chip'; btn.dataset.shape = key;
       btn.textContent = key === 'ALL' ? '전체' : key;
-      btn.addEventListener('click', () => {
-        scaleState.shape = key;
-        renderShapePicker();
-        renderScaleViewer();
-      });
-      scaleShapeList.appendChild(btn);
+      btn.addEventListener('click', () => onPick(key));
+      container.appendChild(btn);
     });
   }
-  scaleShapeList.querySelectorAll('.pick-chip').forEach(btn => {
-    btn.classList.toggle('on', btn.dataset.shape === scaleState.shape);
-  });
+  container.querySelectorAll('.pick-chip').forEach(btn =>
+    btn.classList.toggle('on', btn.dataset.shape === scaleState.shape));
 }
 
+// Scale view picker render fns (used by initScaleViewer & renderScaleViewer)
+function renderRootPicker()  { buildRootPickerIn(scaleRootList,    pc  => { scaleState.root  = pc;  renderRootPicker();  renderScaleViewer(); }); }
+function renderScalePicker() { buildScalePickerIn(scaleTypeList,   key => { scaleState.scale = key; renderScalePicker(); renderScaleViewer(); }); }
+function renderShapePicker() { buildShapePickerIn(scaleShapeList,  key => { scaleState.shape = key; renderShapePicker(); renderScaleViewer(); }); }
+
+
+// ── Shared play functions ─────────────────────────
 function scaleNotesInBox() {
   const scale = SCALES[scaleState.scale];
-  const box = computeBox(scaleState.root, scaleState.shape);
+  const box   = computeBox(scaleState.root, scaleState.shape);
   const notes = [];
   for (let s = 0; s < 6; s++) {
     for (let f = box.start; f <= box.end; f++) {
       const pc = fretPC(s, f);
-      if (scale.intervals.some(iv => (scaleState.root + iv) % 12 === pc)) {
+      if (scale.intervals.some(iv => (scaleState.root + iv) % 12 === pc))
         notes.push({ s, f, midi: STRING_OPEN_MIDI[s] + f });
-      }
     }
   }
   notes.sort((a, b) => a.midi - b.midi);
-  // dedupe by midi (same pitch played on different strings)
   const seen = new Set();
   return notes.filter(n => seen.has(n.midi) ? false : (seen.add(n.midi), true));
 }
@@ -823,40 +808,34 @@ function scaleNotesInBox() {
 function playScaleAsc() {
   const notes = scaleNotesInBox();
   if (!notes.length) return;
-  const rootPc = scaleState.root;
-  // Start at the lowest root in the box (skip any tension/chord tone below it).
-  let startIdx = notes.findIndex(n => n.midi % 12 === rootPc);
-  if (startIdx < 0) startIdx = 0; // no root in this box — fall back to lowest note
-  const seq = notes.slice(startIdx);
-  const gap = 0.22;
-  seq.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
+  let si = notes.findIndex(n => n.midi % 12 === scaleState.root);
+  if (si < 0) si = 0;
+  notes.slice(si).forEach((n, i) => playNote(n.midi, i * 0.22, 0.4, 0.28));
 }
 function playScaleDesc() {
   const notes = scaleNotesInBox();
   if (!notes.length) return;
-  const rootPc = scaleState.root;
-  // Start at the highest root in the box (skip anything above it).
-  let endIdx = -1;
+  let ei = -1;
   for (let i = notes.length - 1; i >= 0; i--) {
-    if (notes[i].midi % 12 === rootPc) { endIdx = i; break; }
+    if (notes[i].midi % 12 === scaleState.root) { ei = i; break; }
   }
-  if (endIdx < 0) endIdx = notes.length - 1;
-  const seq = notes.slice(0, endIdx + 1).reverse();
-  const gap = 0.22;
-  seq.forEach((n, i) => playNote(n.midi, i * gap, 0.4, 0.28));
+  if (ei < 0) ei = notes.length - 1;
+  notes.slice(0, ei + 1).reverse().forEach((n, i) => playNote(n.midi, i * 0.22, 0.4, 0.28));
 }
 function playScaleChord() {
-  // Stack the scale's chord tones at C3 register
   const scale = SCALES[scaleState.scale];
-  const root = scaleState.root;
+  const root  = scaleState.root;
   scale.chordTones.forEach(deg => {
-    const idx = scale.degrees.findIndex(d => d === deg);
+    let idx = -1;
+    for (let i = scale.degrees.length - 1; i >= 0; i--) {
+      if (scale.degrees[i] === deg) { idx = i; break; }
+    }
     if (idx < 0) return;
-    const iv = scale.intervals[idx];
-    playNote(CHORD_BASE_MIDI + root + iv, 0, 1.6, 0.18);
+    playNote(CHORD_BASE_MIDI + root + scale.intervals[idx], 0, 1.6, 0.18);
   });
 }
 
+// ── Scale viewer init ─────────────────────────────
 let scaleViewerInited = false;
 function initScaleViewer() {
   if (scaleViewerInited) return;
@@ -868,9 +847,319 @@ function initScaleViewer() {
   renderScaleViewer();
 }
 
+// ── Practice view: proportional guitar neck (22 frets) ──────
+// Sustained note — returns stop() closure
+function startSustainedNote(midi, vel = 0.28) {
+  const ctx = getAudioCtx();
+  if (!ctx) return () => {};
+  const freq = midiToFreq(midi);
+  const t0   = ctx.currentTime;
+
+  const o1 = ctx.createOscillator(); o1.type = 'triangle'; o1.frequency.value = freq;
+  const o2 = ctx.createOscillator(); o2.type = 'sine';     o2.frequency.value = freq * 2;
+  const g1 = ctx.createGain(); g1.gain.value = vel;
+  const g2 = ctx.createGain(); g2.gain.value = vel * 0.3;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = Math.min(7000, freq * 5); lp.Q.value = 0.7;
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0.0001, t0);
+  env.gain.linearRampToValueAtTime(1,    t0 + 0.010);
+  env.gain.exponentialRampToValueAtTime(0.60, t0 + 0.18);
+  o1.connect(g1); g1.connect(env);
+  o2.connect(g2); g2.connect(env);
+  env.connect(lp); lp.connect(ctx.destination);
+  o1.start(t0); o2.start(t0);
+
+  let done = false;
+  return () => {
+    if (done) return; done = true;
+    const now = ctx.currentTime;
+    env.gain.cancelScheduledValues(now);
+    env.gain.setValueAtTime(env.gain.value, now);
+    env.gain.exponentialRampToValueAtTime(0.001, now + 0.20);
+    o1.stop(now + 0.25); o2.stop(now + 0.25);
+  };
+}
+
+const FN_FRETS      = 22;
+const FN_NUT_W      = 44;
+const FN_FRET1_W    = 72;
+const FN_RATIO      = Math.pow(2, -1 / 12);
+const FN_INLAY_SNGL = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
+
+let fnInited  = false;
+let fnFretPos = null;
+let fnOffset  = 0;
+const fnFingers = new Map();
+
+function fnMakeWidths() {
+  const ws = [];
+  for (let f = 0; f <= FN_FRETS; f++)
+    ws.push(f === 0 ? FN_NUT_W : Math.round(FN_FRET1_W * Math.pow(FN_RATIO, f - 1)));
+  return ws;
+}
+
+function buildFretNeck() {
+  const strColEl   = document.getElementById('fnStrCol');
+  const innerEl    = document.getElementById('fnInner');
+  const viewportEl = document.getElementById('fnViewport');
+
+  strColEl.innerHTML = '';
+  const corner = document.createElement('div');
+  corner.className = 'fn-corner';
+  strColEl.appendChild(corner);
+  for (let s = 0; s < 6; s++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'fn-str-lbl';
+    lbl.textContent = 6 - s;
+    strColEl.appendChild(lbl);
+  }
+
+  // Proportional inner grid
+  const ws    = fnMakeWidths();
+  fnFretPos   = [0];
+  ws.forEach(w => fnFretPos.push(fnFretPos[fnFretPos.length - 1] + w));
+  const totalW = fnFretPos[FN_FRETS + 1];
+
+  innerEl.innerHTML = '';
+  innerEl.style.width = totalW + 'px';
+  innerEl.style.gridTemplateColumns = ws.map(w => w + 'px').join(' ');
+
+  // Header row
+  for (let f = 0; f <= FN_FRETS; f++) {
+    const hdr = document.createElement('div');
+    hdr.className = 'fn-fhdr' + (f === 0 ? ' fn-nut-hdr' : '');
+    if (f === 12) {
+      hdr.classList.add('has-inlay');
+      const d = document.createElement('span');
+      d.className = 'fn-inlay-dot double';
+      hdr.appendChild(d);
+    } else if (FN_INLAY_SNGL.has(f)) {
+      hdr.classList.add('has-inlay');
+      const d = document.createElement('span');
+      d.className = 'fn-inlay-dot';
+      hdr.appendChild(d);
+    }
+    const num = document.createElement('span');
+    num.className = 'fn-fnum';
+    num.textContent = f;
+    hdr.appendChild(num);
+    innerEl.appendChild(hdr);
+  }
+
+  // String cell rows (s=0 = string 6, low E, at top)
+  for (let s = 0; s < 6; s++) {
+    for (let f = 0; f <= FN_FRETS; f++) {
+      const cell = document.createElement('div');
+      cell.className = 'fn-cell' + (f === 0 ? ' fn-nut-cell' : '');
+      cell.dataset.s = s;
+      cell.dataset.f = f;
+      innerEl.appendChild(cell);
+    }
+  }
+
+  // Touch events
+  innerEl.addEventListener('touchstart',  onFnTouchStart,  { passive: false });
+  innerEl.addEventListener('touchmove',   onFnTouchMove,   { passive: false });
+  innerEl.addEventListener('touchend',    onFnTouchEnd,    { passive: false });
+  innerEl.addEventListener('touchcancel', onFnTouchEnd,    { passive: false });
+
+  // Slider
+  const slider = document.getElementById('fnSlider');
+  function refreshSliderMax() {
+    if (!viewportEl || !fnFretPos) return;
+    const vw = viewportEl.clientWidth;
+    let maxFret = 0;
+    for (let f = FN_FRETS; f >= 0; f--) {
+      if (fnFretPos[FN_FRETS + 1] - fnFretPos[f] >= vw) { maxFret = f; break; }
+    }
+    slider.max = maxFret;
+    const cur = Math.min(+slider.value, maxFret);
+    if (cur !== +slider.value) {
+      slider.value = cur;
+      fnOffset = fnFretPos[cur];
+      innerEl.style.transform = `translateX(${-fnOffset}px)`;
+      updateFnFretInfo();
+    }
+  }
+  slider.addEventListener('input', () => {
+    fnOffset = fnFretPos[+slider.value];
+    innerEl.style.transition = 'none';
+    innerEl.style.transform  = `translateX(${-fnOffset}px)`;
+    updateFnFretInfo();
+  });
+  requestAnimationFrame(refreshSliderMax);
+  window.addEventListener('resize', refreshSliderMax);
+}
+
+function updateFnFretInfo() {
+  const slider = document.getElementById('fnSlider');
+  const f = +slider.value;
+  const el = document.getElementById('fnFretInfo');
+  if (el) el.textContent = f === 0 ? '개방' : f + '프렛';
+}
+
+function renderFretNeck() {
+  if (!fnInited) return;
+  const scale = SCALES[scaleState.scale];
+  const ctx   = chordContext(scaleState.root, scale);
+  const box   = computeBox(scaleState.root, scaleState.shape);
+
+  document.querySelectorAll('#fnInner .fn-cell').forEach(cell => {
+    const s  = +cell.dataset.s;
+    const f  = +cell.dataset.f;
+    const pc = fretPC(s, f);
+    const idx = scale.intervals.findIndex(iv => (scaleState.root + iv) % 12 === pc);
+    cell.className = 'fn-cell' + (f === 0 ? ' fn-nut-cell' : '');
+    if (f >= box.start && f <= box.end) cell.classList.add('fn-in-box');
+    cell.innerHTML = '';
+    if (idx >= 0) {
+      cell.classList.add('fn-' + classifyTone(scale, idx));
+      const dot = document.createElement('span');
+      dot.className = 'fn-dot';
+      dot.textContent = spellingToString(ctx.toneSpellings[idx]);
+      cell.appendChild(dot);
+    }
+  });
+
+  const keyBtn   = document.getElementById('fnKeyBtn');
+  const scaleBtn = document.getElementById('fnScaleBtn');
+  const shapeBtn = document.getElementById('fnShapeBtn');
+  if (keyBtn)   keyBtn.textContent   = spellingToString(ctx.rootSpelling);
+  if (scaleBtn) scaleBtn.textContent = scale.name;
+  if (shapeBtn) shapeBtn.textContent = scaleState.shape === 'ALL' ? '전체' : scaleState.shape + '형';
+
+  if (scaleState.shape !== 'ALL' && fnFretPos) {
+    const slider = document.getElementById('fnSlider');
+    const target = Math.max(0, Math.min(+slider.max, box.start > 0 ? box.start - 1 : 0));
+    slider.value = target;
+    fnOffset = fnFretPos[target];
+    const inner = document.getElementById('fnInner');
+    if (inner) { inner.style.transition = 'none'; inner.style.transform = `translateX(${-fnOffset}px)`; }
+    updateFnFretInfo();
+  }
+}
+
+// Touch handlers
+function fnCellAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el?.closest?.('.fn-cell') || null;
+}
+function onFnTouchStart(e) {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    const cell = fnCellAt(t.clientX, t.clientY);
+    if (!cell) continue;
+    const midi = STRING_OPEN_MIDI[+cell.dataset.s] + +cell.dataset.f;
+    cell.classList.add('fn-pressed');
+    fnFingers.set(t.identifier, { stop: startSustainedNote(midi), cell });
+  }
+}
+function onFnTouchMove(e) {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    const finger = fnFingers.get(t.identifier);
+    if (!finger) continue;
+    const cell = fnCellAt(t.clientX, t.clientY);
+    if (cell && cell !== finger.cell) {
+      finger.stop();
+      finger.cell.classList.remove('fn-pressed');
+      const midi = STRING_OPEN_MIDI[+cell.dataset.s] + +cell.dataset.f;
+      finger.stop = startSustainedNote(midi);
+      finger.cell = cell;
+      cell.classList.add('fn-pressed');
+    }
+  }
+}
+function onFnTouchEnd(e) {
+  for (const t of e.changedTouches) {
+    const finger = fnFingers.get(t.identifier);
+    if (finger) {
+      finger.stop();
+      finger.cell.classList.remove('fn-pressed');
+      fnFingers.delete(t.identifier);
+    }
+  }
+}
+
+// Dialog builders
+function buildFnKeyDialog() {
+  const grid = document.getElementById('fnKeyGrid');
+  if (grid.children.length) return;
+  for (let pc = 0; pc < 12; pc++) {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'fn-pick-btn'; btn.dataset.pc = pc;
+    btn.addEventListener('click', () => {
+      scaleState.root = pc;
+      syncFnKeyDialog();
+      renderFretNeck();
+      if (scaleViewerInited) renderScaleViewer();
+      document.getElementById('fnKeyDialog').close();
+    });
+    grid.appendChild(btn);
+  }
+}
+function syncFnKeyDialog() {
+  const scale = SCALES[scaleState.scale];
+  document.querySelectorAll('#fnKeyGrid .fn-pick-btn').forEach(btn => {
+    const pc = +btn.dataset.pc;
+    btn.textContent = spellingToString(chordContext(pc, scale).rootSpelling);
+    btn.classList.toggle('on', pc === scaleState.root);
+  });
+}
+function buildFnScaleDialog() {
+  const list = document.getElementById('fnScaleGrid');
+  if (list.children.length) return;
+  Object.entries(SCALES).forEach(([key, def]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'fn-pick-btn'; btn.dataset.scale = key;
+    btn.textContent = def.name;
+    btn.addEventListener('click', () => {
+      scaleState.scale = key;
+      syncFnScaleDialog();
+      renderFretNeck();
+      if (scaleViewerInited) renderScaleViewer();
+      document.getElementById('fnScaleDialog').close();
+    });
+    list.appendChild(btn);
+  });
+}
+function syncFnScaleDialog() {
+  document.querySelectorAll('#fnScaleGrid .fn-pick-btn').forEach(btn =>
+    btn.classList.toggle('on', btn.dataset.scale === scaleState.scale));
+}
+
+document.getElementById('fnKeyBtn').addEventListener('click', () => {
+  buildFnKeyDialog(); syncFnKeyDialog();
+  const d = document.getElementById('fnKeyDialog');
+  if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+});
+document.getElementById('fnScaleBtn').addEventListener('click', () => {
+  buildFnScaleDialog(); syncFnScaleDialog();
+  const d = document.getElementById('fnScaleDialog');
+  if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+});
+document.getElementById('fnShapeBtn').addEventListener('click', () => {
+  const shapes = ['C', 'A', 'G', 'E', 'D', 'ALL'];
+  scaleState.shape = shapes[(shapes.indexOf(scaleState.shape) + 1) % shapes.length];
+  renderFretNeck();
+  if (scaleViewerInited) renderScaleViewer();
+});
+
+// Practice view init
+function initFretNeck() {
+  if (!fnInited) {
+    fnInited = true;
+    buildFretNeck();
+  }
+  renderFretNeck();
+}
+
+// Scale view play buttons
 document.getElementById('scaleAscBtn').addEventListener('click', playScaleAsc);
 document.getElementById('scaleDescBtn').addEventListener('click', playScaleDesc);
 document.getElementById('scaleChordBtn').addEventListener('click', playScaleChord);
+
 
 const scaleHelpDialog = document.getElementById('scaleHelpDialog');
 document.getElementById('scaleHelpBtn').addEventListener('click', () => {
@@ -880,11 +1169,12 @@ document.getElementById('scaleHelpBtn').addEventListener('click', () => {
 document.getElementById('homeHelpBtn').addEventListener('click', openHelp);
 
 // ── View navigation ───────────────────────────
-const VALID_VIEWS = ['home','quiz','scales'];
+const VALID_VIEWS = ['home','quiz','scales','practice'];
 function setView(name) {
   if (!VALID_VIEWS.includes(name)) name = 'home';
   document.body.dataset.view = name;
-  if (name === 'scales') initScaleViewer();
+  if (name === 'scales')   initScaleViewer();
+  if (name === 'practice') initFretNeck();
   if (name === 'quiz' && !localStorage.getItem(FIRST_RUN_KEY)) {
     setTimeout(() => { openHelp(); localStorage.setItem(FIRST_RUN_KEY, '1'); }, 200);
   }

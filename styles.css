@@ -50,9 +50,10 @@ body {
   flex: 1;
   min-height: 0;
 }
-body[data-view="home"]   #view-home   { display: flex; }
-body[data-view="quiz"]   #view-quiz   { display: flex; }
-body[data-view="scales"] #view-scales { display: flex; }
+body[data-view="home"]     #view-home     { display: flex; }
+body[data-view="quiz"]     #view-quiz     { display: flex; }
+body[data-view="scales"]   #view-scales   { display: flex; }
+body[data-view="practice"] #view-practice { display: flex; }
 
 .topbar-title {
   font-weight: 700;
@@ -686,3 +687,271 @@ body.show-notes .cell.fret-0::after { display: none; }
   color: var(--accent);
 }
 .primary-btn.ghost:active { background: var(--accent-dim); color: white; }
+
+/* ── Practice view: proportional guitar neck ───────── */
+:root {
+  --nk-neck:  #1a0d06;
+  --nk-fret:  #5c3820;
+  --nk-nut:   #d8c080;
+  --nk-inlay: rgba(255,255,255,0.38);
+}
+
+#view-practice {
+  background: var(--nk-neck);
+  position: relative;
+}
+
+/* ── Header ───────────────────────────────────────── */
+.fn-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #110700;
+  border-bottom: 1px solid var(--nk-fret);
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.fn-hbtn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #d8c898;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
+  transition: background 100ms ease;
+}
+.fn-hbtn:active { background: rgba(88,166,255,0.3); color: white; }
+.fn-key-btn { color: var(--accent); font-size: 16px; padding: 5px 12px; min-width: 36px; text-align: center; }
+.fn-flex-spacer { flex: 1; }
+.fn-fret-info {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.45);
+  background: rgba(0,0,0,0.35);
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+/* ── Body: string labels + viewport ──────────────── */
+.fn-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+.fn-str-col {
+  flex-shrink: 0;
+  width: 28px;
+  background: #0c0400;
+  border-right: 3px solid var(--nk-nut);
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+.fn-corner {
+  flex-shrink: 0;
+  height: 26px;
+  background: #0c0400;
+}
+.fn-str-lbl {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(200,160,80,0.60);
+}
+
+/* ── Viewport + inner grid ────────────────────────── */
+.fn-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: var(--nk-neck);
+}
+.fn-inner {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  display: grid;
+  grid-template-rows: 26px repeat(6, 1fr);
+  will-change: transform;
+}
+
+/* ── Fret header row ─────────────────────────────── */
+.fn-fhdr {
+  background: #0a0300;
+  border-right: 1.5px solid var(--nk-fret);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.fn-nut-hdr { border-right: 4px solid var(--nk-nut); }
+.fn-fnum {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.28);
+  line-height: 1;
+}
+.fn-fhdr.has-inlay .fn-fnum { color: rgba(255,255,255,0.62); }
+.fn-inlay-dot {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--nk-inlay);
+  pointer-events: none;
+}
+.fn-inlay-dot.double { width: 14px; border-radius: 3px; }
+
+/* ── String cells ─────────────────────────────────── */
+.fn-cell {
+  position: relative;
+  border-right: 1.5px solid var(--nk-fret);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.fn-nut-cell { border-right: 4px solid var(--nk-nut); }
+.fn-cell::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.fn-cell[data-s="0"]::before { height: 3.2px; background: rgba(220,200,155,0.82); }
+.fn-cell[data-s="1"]::before { height: 2.5px; background: rgba(215,195,150,0.79); }
+.fn-cell[data-s="2"]::before { height: 1.9px; background: rgba(210,190,145,0.76); }
+.fn-cell[data-s="3"]::before { height: 1.5px; background: rgba(205,185,140,0.73); }
+.fn-cell[data-s="4"]::before { height: 1.2px; background: rgba(200,180,135,0.70); }
+.fn-cell[data-s="5"]::before { height: 0.9px; background: rgba(195,175,130,0.68); }
+.fn-cell.fn-in-box { background: rgba(88,166,255,0.05); }
+
+/* ── Note dots ───────────────────────────────────── */
+.fn-dot {
+  position: relative;
+  z-index: 2;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  color: #fff;
+  pointer-events: none;
+  flex-shrink: 0;
+  transition: transform 0.07s ease;
+}
+.fn-root    .fn-dot { background: var(--accent); width: 32px; height: 32px; font-size: 9px; box-shadow: 0 0 10px rgba(88,166,255,0.55); }
+.fn-chord   .fn-dot { background: #2ec4b6; }
+.fn-tension .fn-dot { background: var(--warn); }
+.fn-avoid   .fn-dot { background: var(--bad); opacity: 0.45; }
+.fn-cell:not(.fn-in-box) .fn-dot { opacity: 0.16; }
+.fn-cell.fn-pressed { background: rgba(88,166,255,0.12) !important; }
+.fn-cell.fn-pressed .fn-dot {
+  transform: scale(1.22);
+  opacity: 1 !important;
+  box-shadow: 0 0 16px rgba(255,255,255,0.55) !important;
+}
+
+/* ── Navigation slider ───────────────────────────── */
+.fn-nav-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px 6px;
+  background: #0c0400;
+  border-top: 1px solid var(--nk-fret);
+  flex-shrink: 0;
+}
+.fn-slider {
+  flex: 1;
+  accent-color: var(--nk-nut);
+  cursor: pointer;
+  height: 24px;
+}
+
+/* ── Portrait hint ───────────────────────────────── */
+.fn-portrait-hint {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 50;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+@media (orientation: portrait) {
+  body[data-view="practice"] .fn-portrait-hint { display: flex; }
+}
+.fn-rotate-icon { font-size: 40px; color: rgba(255,255,255,0.85); }
+.fn-rotate-msg { color: white; font-size: 15px; font-weight: 700; text-align: center; line-height: 1.5; }
+
+/* ── Picker dialogs ───────────────────────────────── */
+.fn-dialog {
+  background: var(--bg-elev);
+  color: var(--fg);
+  border: none;
+  border-radius: 14px;
+  padding: 0;
+  max-width: 92vw;
+  width: 360px;
+  max-height: 80vh;
+  overflow: hidden;
+}
+.fn-dialog::backdrop { background: rgba(0,0,0,0.7); }
+.fn-dialog form { padding: 16px; overflow-y: auto; max-height: 80vh; }
+.fn-dialog-title { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
+.fn-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.fn-pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+.fn-pick-btn {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--fret-line);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 100ms ease;
+}
+.fn-pick-btn:hover { background: rgba(88,166,255,0.08); }
+.fn-pick-btn.on { background: var(--accent-dim); border-color: var(--accent); color: white; }
+

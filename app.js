@@ -882,8 +882,8 @@ function startSustainedNote(midi, vel = 0.28) {
 }
 
 const FN_FRETS      = 22;
-const FN_NUT_W      = 56;
-const FN_FRET1_W    = 90;
+const FN_NUT_W      = 112;
+const FN_FRET1_W    = 180;
 const FN_RATIO      = Math.pow(2, -1 / 12);
 const FN_INLAY_SNGL = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
 
@@ -1168,7 +1168,17 @@ document.getElementById('homeHelpBtn').addEventListener('click', openHelp);
 const VALID_VIEWS = ['home','quiz','scales','practice'];
 function setView(name) {
   if (!VALID_VIEWS.includes(name)) name = 'home';
+  const prev = document.body.dataset.view;
   document.body.dataset.view = name;
+
+  if (name === 'practice') {
+    // Lock to landscape when entering practice view
+    screen.orientation?.lock?.('landscape').catch(() => {});
+  } else if (prev === 'practice') {
+    // Unlock when leaving practice view
+    try { screen.orientation?.unlock?.(); } catch (_) {}
+  }
+
   if (name === 'scales')   initScaleViewer();
   if (name === 'practice') initFretNeck();
   if (name === 'quiz' && !localStorage.getItem(FIRST_RUN_KEY)) {

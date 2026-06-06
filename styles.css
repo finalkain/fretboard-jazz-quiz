@@ -711,6 +711,7 @@ body.show-notes .cell.fret-0::after { display: none; }
   border-bottom: 1px solid var(--nk-fret);
   flex-shrink: 0;
   min-height: 36px;
+  position: relative;
 }
 .fn-fret-info {
   flex: 1;
@@ -882,19 +883,19 @@ body.show-notes .cell.fret-0::after { display: none; }
 .fn-dot {
   position: relative;
   z-index: 2;
-  width: 36px; height: 36px;
+  width: 46px; height: 46px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   color: #fff;
   pointer-events: none;
   flex-shrink: 0;
   transition: transform 0.07s ease;
 }
-.fn-root    .fn-dot { background: var(--accent); width: 40px; height: 40px; font-size: 11px; box-shadow: 0 0 12px rgba(88,166,255,0.6); }
+.fn-root    .fn-dot { background: var(--accent); width: 52px; height: 52px; font-size: 14px; box-shadow: 0 0 14px rgba(88,166,255,0.65); }
 .fn-chord   .fn-dot { background: #2ec4b6; }
 .fn-tension .fn-dot { background: var(--warn); }
 .fn-avoid   .fn-dot { background: var(--bad); opacity: 0.45; }
@@ -922,7 +923,21 @@ body.show-notes .cell.fret-0::after { display: none; }
   height: 24px;
 }
 
-/* Portrait hint removed — practice view works in all orientations */
+/* ── Portrait rotate hint (non-blocking) ─────────── */
+@media (orientation: portrait) {
+  body[data-view="practice"] .fn-header::after {
+    content: '↻ 가로로 돌리세요';
+    position: absolute;
+    right: 56px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,200,80,0.8);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+}
 
 /* ── Picker dialogs ───────────────────────────────── */
 .fn-dialog {

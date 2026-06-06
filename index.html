@@ -133,33 +133,29 @@
 
 <!-- ── PRACTICE (Guitar Neck) ────────────────────────── -->
 <div class="view" id="view-practice">
-  <!-- Compact header: back / key / scale / CAGED / fret info -->
+  <!-- Minimal header: back + fret info + fullscreen -->
   <header class="fn-header">
     <button class="icon-btn" data-back aria-label="메인으로">←</button>
-    <button id="fnKeyBtn"   class="fn-hbtn fn-key-btn">A</button>
-    <button id="fnScaleBtn" class="fn-hbtn fn-scale-btn">메이저</button>
-    <button id="fnShapeBtn" class="fn-hbtn fn-shape-btn">E형</button>
-    <span class="fn-flex-spacer"></span>
     <span id="fnFretInfo" class="fn-fret-info">개방</span>
+    <button id="fnFullscreenBtn" class="icon-btn fn-fs-btn" aria-label="전체화면">⛶</button>
   </header>
 
-  <!-- Neck body: string labels + proportional fretboard -->
+  <!-- Neck body: fretboard (reversed) + string labels + info sidebar -->
   <div class="fn-body">
-    <div class="fn-str-col" id="fnStrCol"></div>
     <div class="fn-viewport" id="fnViewport">
       <div class="fn-inner" id="fnInner"></div>
+    </div>
+    <div class="fn-str-col" id="fnStrCol"></div>
+    <div class="fn-side-info" id="fnSideInfo">
+      <button id="fnKeyBtn"   class="fn-side-btn fn-key-btn">A</button>
+      <button id="fnScaleBtn" class="fn-side-btn fn-scale-btn">메이저</button>
+      <button id="fnShapeBtn" class="fn-side-btn fn-shape-btn">E형</button>
     </div>
   </div>
 
   <!-- Navigation slider -->
   <div class="fn-nav-row">
     <input type="range" id="fnSlider" class="fn-slider" min="0" max="17" value="0" step="1">
-  </div>
-
-  <!-- Portrait hint -->
-  <div class="fn-portrait-hint" aria-hidden="true">
-    <span class="fn-rotate-icon">↻</span>
-    <span class="fn-rotate-msg">화면을 가로로 회전하세요<br>기타를 쥐듯 스마트폰을 뉘어 주세요</span>
   </div>
 
   <!-- Key picker dialog -->

@@ -882,8 +882,8 @@ function startSustainedNote(midi, vel = 0.28) {
 }
 
 const FN_FRETS      = 22;
-const FN_NUT_W      = 44;
-const FN_FRET1_W    = 72;
+const FN_NUT_W      = 56;
+const FN_FRET1_W    = 90;
 const FN_RATIO      = Math.pow(2, -1 / 12);
 const FN_INLAY_SNGL = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
 
@@ -892,18 +892,12 @@ let fnFretPos = null;
 let fnOffset  = 0;
 const fnFingers = new Map();
 
-function fnMakeWidths() {
-  const ws = [];
-  for (let f = 0; f <= FN_FRETS; f++)
-    ws.push(f === 0 ? FN_NUT_W : Math.round(FN_FRET1_W * Math.pow(FN_RATIO, f - 1)));
-  return ws;
-}
-
 function buildFretNeck() {
   const strColEl   = document.getElementById('fnStrCol');
   const innerEl    = document.getElementById('fnInner');
   const viewportEl = document.getElementById('fnViewport');
 
+  // String labels on the right side (nut end)
   strColEl.innerHTML = '';
   const corner = document.createElement('div');
   corner.className = 'fn-corner';
@@ -915,18 +909,22 @@ function buildFretNeck() {
     strColEl.appendChild(lbl);
   }
 
-  // Proportional inner grid
-  const ws    = fnMakeWidths();
-  fnFretPos   = [0];
-  ws.forEach(w => fnFretPos.push(fnFretPos[fnFretPos.length - 1] + w));
+  // Build fnFretPos using ORIGINAL order (fret 0=nut first) for scroll offset math
+  const origWs = [];
+  for (let f = 0; f <= FN_FRETS; f++)
+    origWs.push(f === 0 ? FN_NUT_W : Math.round(FN_FRET1_W * Math.pow(FN_RATIO, f - 1)));
+  fnFretPos = [0];
+  origWs.forEach(w => fnFretPos.push(fnFretPos[fnFretPos.length - 1] + w));
   const totalW = fnFretPos[FN_FRETS + 1];
 
+  // Grid columns in REVERSED order: fret 22 (high) on left, fret 0 (nut) on right
+  const reversedWs = [...origWs].reverse();
   innerEl.innerHTML = '';
   innerEl.style.width = totalW + 'px';
-  innerEl.style.gridTemplateColumns = ws.map(w => w + 'px').join(' ');
+  innerEl.style.gridTemplateColumns = reversedWs.map(w => w + 'px').join(' ');
 
-  // Header row
-  for (let f = 0; f <= FN_FRETS; f++) {
+  // Header row rendered high→low (fret 22 leftmost, fret 0 rightmost)
+  for (let f = FN_FRETS; f >= 0; f--) {
     const hdr = document.createElement('div');
     hdr.className = 'fn-fhdr' + (f === 0 ? ' fn-nut-hdr' : '');
     if (f === 12) {
@@ -942,14 +940,14 @@ function buildFretNeck() {
     }
     const num = document.createElement('span');
     num.className = 'fn-fnum';
-    num.textContent = f;
+    num.textContent = f === 0 ? '' : f;
     hdr.appendChild(num);
     innerEl.appendChild(hdr);
   }
 
-  // String cell rows (s=0 = string 6, low E, at top)
+  // String cell rows — also rendered high→low per string
   for (let s = 0; s < 6; s++) {
-    for (let f = 0; f <= FN_FRETS; f++) {
+    for (let f = FN_FRETS; f >= 0; f--) {
       const cell = document.createElement('div');
       cell.className = 'fn-cell' + (f === 0 ? ' fn-nut-cell' : '');
       cell.dataset.s = s;
@@ -964,7 +962,7 @@ function buildFretNeck() {
   innerEl.addEventListener('touchend',    onFnTouchEnd,    { passive: false });
   innerEl.addEventListener('touchcancel', onFnTouchEnd,    { passive: false });
 
-  // Slider
+  // Slider — offset = fnFretPos[f] → puts fret f at the viewport's right edge
   const slider = document.getElementById('fnSlider');
   function refreshSliderMax() {
     if (!viewportEl || !fnFretPos) return;
@@ -978,18 +976,28 @@ function buildFretNeck() {
     if (cur !== +slider.value) {
       slider.value = cur;
       fnOffset = fnFretPos[cur];
-      innerEl.style.transform = `translateX(${-fnOffset}px)`;
+      innerEl.style.transform = `translateX(${fnOffset}px)`;
       updateFnFretInfo();
     }
   }
   slider.addEventListener('input', () => {
     fnOffset = fnFretPos[+slider.value];
     innerEl.style.transition = 'none';
-    innerEl.style.transform  = `translateX(${-fnOffset}px)`;
+    innerEl.style.transform  = `translateX(${fnOffset}px)`;
     updateFnFretInfo();
   });
   requestAnimationFrame(refreshSliderMax);
   window.addEventListener('resize', refreshSliderMax);
+
+  // Fullscreen toggle
+  document.getElementById('fnFullscreenBtn').addEventListener('click', () => {
+    const el = document.documentElement;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen || (() => {})).call(document);
+    }
+  });
 }
 
 function updateFnFretInfo() {
@@ -1035,7 +1043,7 @@ function renderFretNeck() {
     slider.value = target;
     fnOffset = fnFretPos[target];
     const inner = document.getElementById('fnInner');
-    if (inner) { inner.style.transition = 'none'; inner.style.transform = `translateX(${-fnOffset}px)`; }
+    if (inner) { inner.style.transition = 'none'; inner.style.transform = `translateX(${fnOffset}px)`; }
     updateFnFretInfo();
   }
 }

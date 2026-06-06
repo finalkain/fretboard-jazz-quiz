@@ -140,12 +140,13 @@
     <button id="fnFullscreenBtn" class="icon-btn fn-fs-btn" aria-label="전체화면">⛶</button>
   </header>
 
-  <!-- Neck body: fretboard (reversed) + string labels + info sidebar -->
+  <!-- Neck body: vertical fretboard (nut top, high frets bottom) -->
   <div class="fn-body">
+    <!-- String labels row (fixed top) + side-info (right, spans full height) -->
+    <div class="fn-str-row" id="fnStrCol"></div>
     <div class="fn-viewport" id="fnViewport">
       <div class="fn-inner" id="fnInner"></div>
     </div>
-    <div class="fn-str-col" id="fnStrCol"></div>
     <div class="fn-side-info" id="fnSideInfo">
       <button id="fnKeyBtn"   class="fn-side-btn fn-key-btn">A</button>
       <button id="fnScaleBtn" class="fn-side-btn fn-scale-btn">메이저</button>

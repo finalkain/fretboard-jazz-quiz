@@ -726,27 +726,38 @@ body.show-notes .cell.fret-0::after { display: none; }
   padding: 4px 6px;
 }
 
-/* ── Body: fretboard + string labels + info sidebar ── */
+/* ── Body: CSS grid — str-row top + viewport main + side-info right ── */
 .fn-body {
   flex: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 40px;
+  grid-template-rows: 30px 1fr;
   min-height: 0;
   overflow: hidden;
 }
-.fn-str-col {
-  flex-shrink: 0;
-  width: 30px;
-  background: #0c0400;
-  border-left: 3px solid var(--nk-nut);
+
+/* String label row (top, column 1) */
+.fn-str-row {
+  grid-column: 1; grid-row: 1;
+  display: grid;
+  grid-template-columns: 30px repeat(6, 1fr);
+  background: #0a0300;
+  border-bottom: 3px solid var(--nk-nut);
+  z-index: 3;
+}
+.fn-str-corner { background: #0a0300; }
+.fn-str-lbl-h {
   display: flex;
-  flex-direction: column;
-  z-index: 2;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(200,160,80,0.70);
 }
 
-/* ── Right info sidebar (key / scale / CAGED) ─────── */
+/* Right info sidebar (key / scale / CAGED) — spans both rows */
 .fn-side-info {
-  flex-shrink: 0;
-  width: 40px;
+  grid-column: 2; grid-row: 1 / 3;
   background: #0a0300;
   border-left: 1px solid var(--nk-fret);
   display: flex;
@@ -755,6 +766,7 @@ body.show-notes .cell.fret-0::after { display: none; }
   gap: 6px;
   padding: 8px 3px;
   z-index: 2;
+  overflow: hidden;
 }
 .fn-side-btn {
   background: rgba(255,255,255,0.07);
@@ -774,6 +786,7 @@ body.show-notes .cell.fret-0::after { display: none; }
   flex-shrink: 0;
   transition: background 100ms ease;
   line-height: 1.3;
+  max-height: 120px;
 }
 .fn-side-btn:active { background: rgba(88,166,255,0.3); color: white; }
 .fn-key-btn {
@@ -781,76 +794,61 @@ body.show-notes .cell.fret-0::after { display: none; }
   font-size: 15px;
   writing-mode: horizontal-tb;
   height: 34px;
+  max-height: 34px;
   padding: 4px 2px;
   letter-spacing: -0.5px;
 }
-.fn-corner {
-  flex-shrink: 0;
-  height: 26px;
-  background: #0c0400;
-}
-.fn-str-lbl {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(200,160,80,0.60);
-}
 
-/* ── Viewport + inner grid ────────────────────────── */
+/* ── Viewport (column 1, row 2) ────────────────────── */
 .fn-viewport {
-  flex: 1;
+  grid-column: 1; grid-row: 2;
   overflow: hidden;
   position: relative;
   background: var(--nk-neck);
 }
+
+/* ── Inner grid: columns=strings, rows=frets ─────── */
 .fn-inner {
   position: absolute;
-  top: 0; right: 0; left: auto; height: 100%;
+  top: 0; left: 0; right: 0;
   display: grid;
-  grid-template-rows: 26px repeat(6, minmax(46px, 1fr));
+  grid-template-columns: 30px repeat(6, 1fr);
+  /* grid-template-rows set by JS (fret heights) */
   will-change: transform;
 }
 
-/* ── Fret header row ─────────────────────────────── */
-.fn-fhdr {
+/* ── Fret number column (leftmost) ───────────────── */
+.fn-fnum-cell {
   background: #0a0300;
-  border-right: 1.5px solid var(--nk-fret);
+  border-bottom: 1.5px solid var(--nk-fret);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 2px;
-  position: relative;
-  overflow: hidden;
-}
-/* Nut column border is provided by fn-str-col's left border */
-.fn-nut-hdr { border-right: 1.5px solid var(--nk-fret); }
-.fn-fnum {
+  justify-content: center;
   font-size: 9px;
   font-weight: 700;
-  color: rgba(255,255,255,0.28);
-  line-height: 1;
+  color: rgba(255,255,255,0.30);
+  position: relative;
+  flex-shrink: 0;
 }
-.fn-fhdr.has-inlay .fn-fnum { color: rgba(255,255,255,0.62); }
-.fn-inlay-dot {
+.fn-fnum-cell.has-inlay { color: rgba(255,255,255,0.70); }
+.fn-fnum-cell.has-inlay::after {
+  content: '•';
   position: absolute;
-  top: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--nk-inlay);
-  pointer-events: none;
+  right: 3px;
+  font-size: 8px;
+  color: var(--nk-inlay);
 }
-.fn-inlay-dot.double { width: 14px; border-radius: 3px; }
+.fn-fnum-cell.has-inlay-double::after { content: '••'; font-size: 7px; }
+.fn-nut-fnum {
+  border-bottom: 4px solid var(--nk-nut);
+  color: rgba(210,192,128,0.5);
+  font-size: 8px;
+}
 
-/* ── String cells ─────────────────────────────────── */
+/* ── String cells (vertical fretboard) ───────────── */
 .fn-cell {
   position: relative;
-  border-right: 1.5px solid var(--nk-fret);
+  border-bottom: 1.5px solid var(--nk-fret);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -859,21 +857,25 @@ body.show-notes .cell.fret-0::after { display: none; }
   -webkit-user-select: none;
   user-select: none;
 }
-.fn-nut-cell { border-right: 1.5px solid var(--nk-fret); }
+/* Nut row: thick bottom border */
+.fn-nut-cell { border-bottom: 4px solid var(--nk-nut); }
+
+/* String lines run VERTICALLY through each column */
 .fn-cell::before {
   content: '';
   position: absolute;
-  left: 0; right: 0; top: 50%;
-  transform: translateY(-50%);
+  top: 0; bottom: 0; left: 50%;
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
 }
-.fn-cell[data-s="0"]::before { height: 3.2px; background: rgba(220,200,155,0.82); }
-.fn-cell[data-s="1"]::before { height: 2.5px; background: rgba(215,195,150,0.79); }
-.fn-cell[data-s="2"]::before { height: 1.9px; background: rgba(210,190,145,0.76); }
-.fn-cell[data-s="3"]::before { height: 1.5px; background: rgba(205,185,140,0.73); }
-.fn-cell[data-s="4"]::before { height: 1.2px; background: rgba(200,180,135,0.70); }
-.fn-cell[data-s="5"]::before { height: 0.9px; background: rgba(195,175,130,0.68); }
+/* String 0 = 6번줄 (thickest), String 5 = 1번줄 (thinnest) */
+.fn-cell[data-s="0"]::before { width: 3.2px; background: rgba(220,200,155,0.82); }
+.fn-cell[data-s="1"]::before { width: 2.5px; background: rgba(215,195,150,0.79); }
+.fn-cell[data-s="2"]::before { width: 1.9px; background: rgba(210,190,145,0.76); }
+.fn-cell[data-s="3"]::before { width: 1.5px; background: rgba(205,185,140,0.73); }
+.fn-cell[data-s="4"]::before { width: 1.2px; background: rgba(200,180,135,0.70); }
+.fn-cell[data-s="5"]::before { width: 0.9px; background: rgba(195,175,130,0.68); }
 .fn-cell.fn-in-box { background: rgba(88,166,255,0.05); }
 
 /* ── Note dots ───────────────────────────────────── */

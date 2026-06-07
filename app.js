@@ -47,12 +47,16 @@ const SCALES = {
 // CAGED shape boxes — each shape anchors on one string; box spans
 // [anchorFret + offsetMin, anchorFret + offsetMax] around the root.
 // 0 = string 6 (low E), 1 = string 5 (A), 2 = string 4 (D).
+// 6-fret windows so each position contains a full one-octave run for all
+// 7-note scales (4-fret boxes skipped notes mid-octave, e.g. B in C
+// harmonic minor / G shape). Centers preserved → positions still march
+// up the neck (C: 0-5, A: 1-6, G: 4-9, E: 6-11, D: 7-12 for key C).
 const CAGED_SHAPES = {
   C: { name: 'C', anchorString: 1, offsetMin: -3, offsetMax: 2 },
-  A: { name: 'A', anchorString: 1, offsetMin: -1, offsetMax: 2 },
-  G: { name: 'G', anchorString: 0, offsetMin: -3, offsetMax: 0 },
-  E: { name: 'E', anchorString: 0, offsetMin: -1, offsetMax: 2 },
-  D: { name: 'D', anchorString: 2, offsetMin: -1, offsetMax: 2 },
+  A: { name: 'A', anchorString: 1, offsetMin: -2, offsetMax: 3 },
+  G: { name: 'G', anchorString: 0, offsetMin: -4, offsetMax: 1 },
+  E: { name: 'E', anchorString: 0, offsetMin: -2, offsetMax: 3 },
+  D: { name: 'D', anchorString: 2, offsetMin: -3, offsetMax: 2 },
 };
 
 // ── Enharmonic spelling (music-theory correct) ────────

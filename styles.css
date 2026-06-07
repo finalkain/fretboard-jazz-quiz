@@ -916,15 +916,40 @@ body.show-notes .cell.fret-0::after { display: none; }
 }
 
 /* ── Vertical slider (inside side panel) ─────────── */
-.fn-slider-v {
-  -webkit-appearance: slider-vertical;
-  writing-mode: vertical-lr;
+.fn-slider-wrap {
   flex: 1;
-  width: 30px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 60px;
-  accent-color: var(--nk-nut);
+  overflow: hidden;
+}
+.fn-slider-v {
+  /* width set by JS = wrapper height; rotate(-90deg) makes it vertical */
+  /* top = min = fret 0 (nut), bottom = max (high fret)                 */
+  transform: rotate(-90deg);
+  height: 28px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
   cursor: pointer;
-  margin: 6px 0 4px;
+  flex-shrink: 0;
+}
+.fn-slider-v::-webkit-slider-runnable-track {
+  height: 4px;
+  background: rgba(210,170,80,0.3);
+  border-radius: 2px;
+}
+.fn-slider-v::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: var(--nk-nut);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
 /* ── Portrait rotate hint (non-blocking) ─────────── */

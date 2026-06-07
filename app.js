@@ -954,35 +954,36 @@ function buildFretNeck() {
   innerEl.addEventListener('touchend',    onFnTouchEnd,    { passive: false });
   innerEl.addEventListener('touchcancel', onFnTouchEnd,    { passive: false });
 
-  // ── Slider: vertical, top=low fret, bottom=high fret
-  //    value is inverted: sliderValue = maxFret - actualFret
+  // ── Slider: rotated -90deg → top=min=fret0(nut), bottom=max(high fret) ──
   const slider = document.getElementById('fnSlider');
+  const sliderWrap = slider.parentElement;
+  function syncSliderWidth() {
+    if (sliderWrap) slider.style.width = sliderWrap.clientHeight + 'px';
+  }
   function refreshSliderMax() {
     if (!viewportEl || !fnFretPos) return;
+    syncSliderWidth();
     const vw = viewportEl.clientWidth;
     let maxFret = 0;
     for (let f = FN_FRETS; f >= 0; f--) {
       if (fnFretPos[FN_FRETS + 1] - fnFretPos[f] >= vw) { maxFret = f; break; }
     }
-    // Recover current fret from fnOffset
-    let curFret = 0;
-    for (let f = FN_FRETS; f >= 0; f--)
-      if (fnFretPos[f] <= fnOffset) { curFret = f; break; }
     slider.max = maxFret;
-    const showFret = Math.min(curFret, maxFret);
-    slider.value = maxFret - showFret;  // inverted: top(max)=fret0, bottom(0)=maxFret
-    fnOffset = fnFretPos[showFret];
-    innerEl.style.transform = `translateX(${-fnOffset}px)`;
-    updateFnFretInfo();
+    const cur = Math.min(+slider.value, maxFret);
+    if (cur !== +slider.value) {
+      slider.value = cur;
+      fnOffset = fnFretPos[cur];
+      innerEl.style.transform = `translateX(${-fnOffset}px)`;
+      updateFnFretInfo();
+    }
   }
   slider.addEventListener('input', () => {
-    const fret = +slider.max - +slider.value;
-    fnOffset = fnFretPos[fret];
+    fnOffset = fnFretPos[+slider.value];
     innerEl.style.transition = 'none';
     innerEl.style.transform  = `translateX(${-fnOffset}px)`;
     updateFnFretInfo();
   });
-  requestAnimationFrame(refreshSliderMax);
+  requestAnimationFrame(() => { syncSliderWidth(); refreshSliderMax(); });
   window.addEventListener('resize', refreshSliderMax);
 
   // Fullscreen toggle
@@ -998,7 +999,7 @@ function buildFretNeck() {
 
 function updateFnFretInfo() {
   const slider = document.getElementById('fnSlider');
-  const f = +slider.max - +slider.value;
+  const f = +slider.value;
   const el = document.getElementById('fnFretInfo');
   if (el) el.textContent = f === 0 ? '개방' : f + '프렛';
 }
@@ -1042,7 +1043,7 @@ function renderFretNeck() {
   if (scaleState.shape !== 'ALL' && fnFretPos) {
     const slider = document.getElementById('fnSlider');
     const target = Math.max(0, Math.min(+slider.max, box.start > 0 ? box.start - 1 : 0));
-    slider.value = +slider.max - target;  // inverted
+    slider.value = target;
     fnOffset = fnFretPos[target];
     const inner = document.getElementById('fnInner');
     if (inner) { inner.style.transition = 'none'; inner.style.transform = `translateX(${-fnOffset}px)`; }

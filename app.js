@@ -954,7 +954,8 @@ function buildFretNeck() {
   innerEl.addEventListener('touchend',    onFnTouchEnd,    { passive: false });
   innerEl.addEventListener('touchcancel', onFnTouchEnd,    { passive: false });
 
-  // ── Slider: controls horizontal scroll (fret 0 at left, higher frets right) ──
+  // ── Slider: vertical, top=low fret, bottom=high fret
+  //    value is inverted: sliderValue = maxFret - actualFret
   const slider = document.getElementById('fnSlider');
   function refreshSliderMax() {
     if (!viewportEl || !fnFretPos) return;
@@ -963,17 +964,20 @@ function buildFretNeck() {
     for (let f = FN_FRETS; f >= 0; f--) {
       if (fnFretPos[FN_FRETS + 1] - fnFretPos[f] >= vw) { maxFret = f; break; }
     }
+    // Recover current fret from fnOffset
+    let curFret = 0;
+    for (let f = FN_FRETS; f >= 0; f--)
+      if (fnFretPos[f] <= fnOffset) { curFret = f; break; }
     slider.max = maxFret;
-    const cur = Math.min(+slider.value, maxFret);
-    if (cur !== +slider.value) {
-      slider.value = cur;
-      fnOffset = fnFretPos[cur];
-      innerEl.style.transform = `translateX(${-fnOffset}px)`;
-      updateFnFretInfo();
-    }
+    const showFret = Math.min(curFret, maxFret);
+    slider.value = maxFret - showFret;  // inverted: top(max)=fret0, bottom(0)=maxFret
+    fnOffset = fnFretPos[showFret];
+    innerEl.style.transform = `translateX(${-fnOffset}px)`;
+    updateFnFretInfo();
   }
   slider.addEventListener('input', () => {
-    fnOffset = fnFretPos[+slider.value];
+    const fret = +slider.max - +slider.value;
+    fnOffset = fnFretPos[fret];
     innerEl.style.transition = 'none';
     innerEl.style.transform  = `translateX(${-fnOffset}px)`;
     updateFnFretInfo();
@@ -994,7 +998,7 @@ function buildFretNeck() {
 
 function updateFnFretInfo() {
   const slider = document.getElementById('fnSlider');
-  const f = +slider.value;
+  const f = +slider.max - +slider.value;
   const el = document.getElementById('fnFretInfo');
   if (el) el.textContent = f === 0 ? '개방' : f + '프렛';
 }
@@ -1038,7 +1042,7 @@ function renderFretNeck() {
   if (scaleState.shape !== 'ALL' && fnFretPos) {
     const slider = document.getElementById('fnSlider');
     const target = Math.max(0, Math.min(+slider.max, box.start > 0 ? box.start - 1 : 0));
-    slider.value = target;
+    slider.value = +slider.max - target;  // inverted
     fnOffset = fnFretPos[target];
     const inner = document.getElementById('fnInner');
     if (inner) { inner.style.transition = 'none'; inner.style.transform = `translateX(${-fnOffset}px)`; }

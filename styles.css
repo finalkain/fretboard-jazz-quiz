@@ -917,6 +917,7 @@ body.show-notes .cell.fret-0::after { display: none; }
 
 /* ── Vertical slider (inside side panel) ─────────── */
 .fn-slider-v {
+  -webkit-appearance: slider-vertical;
   writing-mode: vertical-lr;
   flex: 1;
   width: 30px;

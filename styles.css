@@ -688,7 +688,7 @@ body.show-notes .cell.fret-0::after { display: none; }
 }
 .primary-btn.ghost:active { background: var(--accent-dim); color: white; }
 
-/* ── Practice view: proportional guitar neck ───────── */
+/* ── Practice view: vertical guitar neck ───────────── */
 :root {
   --nk-neck:  #1a0d06;
   --nk-fret:  #5c3820;
@@ -727,27 +727,37 @@ body.show-notes .cell.fret-0::after { display: none; }
   padding: 4px 6px;
 }
 
-/* ── Body: CSS grid — str-col left + viewport main + side-info right ── */
+/* ── Body: flex row — neck area left + side info right ── */
 .fn-body {
   flex: 1;
-  display: grid;
-  grid-template-columns: 30px 1fr 44px;
-  grid-template-rows: 1fr;
+  display: flex;
+  flex-direction: row;
   min-height: 0;
   overflow: hidden;
 }
 
-/* String label column (left, fixed) */
-.fn-str-col {
-  grid-column: 1; grid-row: 1;
+/* Neck area: flex column — string labels top, viewport, slider bottom */
+.fn-neck-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* String label row (top, fixed): corner + str6..str1 left→right */
+.fn-str-row {
+  flex-shrink: 0;
+  height: 30px;
   display: grid;
-  grid-template-rows: 30px repeat(6, 1fr);
+  grid-template-columns: 30px repeat(6, 1fr);
   background: #0a0300;
-  border-right: 3px solid var(--nk-nut);
+  border-bottom: 3px solid var(--nk-nut);
   z-index: 3;
 }
 .fn-str-corner { background: #0a0300; }
-.fn-str-lbl-v {
+.fn-str-lbl-h {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -756,9 +766,10 @@ body.show-notes .cell.fret-0::after { display: none; }
   color: rgba(200,160,80,0.70);
 }
 
-/* Right info sidebar (key / scale / CAGED) */
+/* Right info sidebar */
 .fn-side-info {
-  grid-column: 3; grid-row: 1;
+  flex-shrink: 0;
+  width: 44px;
   background: #0a0300;
   border-left: 1px solid var(--nk-fret);
   display: flex;
@@ -800,28 +811,29 @@ body.show-notes .cell.fret-0::after { display: none; }
   letter-spacing: -0.5px;
 }
 
-/* ── Viewport (column 2, row 1) ────────────────────── */
+/* ── Viewport (flex: 1 in neck column) ─────────────── */
 .fn-viewport {
-  grid-column: 2; grid-row: 1;
+  flex: 1;
   overflow: hidden;
   position: relative;
   background: var(--nk-neck);
+  min-height: 0;
 }
 
-/* ── Inner grid: rows=strings, columns=frets ─────── */
+/* ── Inner grid: cols=[fret-num | s0..s5], rows=fret heights ─ */
 .fn-inner {
   position: absolute;
-  top: 0; left: 0; bottom: 0;
+  top: 0; left: 0; right: 0;
   display: grid;
-  grid-template-rows: 30px repeat(6, 1fr);
-  /* grid-template-columns set by JS (fret widths) */
+  grid-template-columns: 30px repeat(6, 1fr);
+  /* grid-template-rows set by JS (fret heights) */
   will-change: transform;
 }
 
-/* ── Fret number row (topmost) ───────────────────── */
+/* ── Fret number column (leftmost) ────────────────── */
 .fn-fnum-cell {
   background: #0a0300;
-  border-right: 1.5px solid var(--nk-fret);
+  border-bottom: 1.5px solid var(--nk-fret);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -835,23 +847,23 @@ body.show-notes .cell.fret-0::after { display: none; }
 .fn-fnum-cell.has-inlay::after {
   content: '•';
   position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 8px;
   color: var(--nk-inlay);
 }
 .fn-fnum-cell.has-inlay-double::after { content: '••'; font-size: 7px; }
 .fn-nut-fnum {
-  border-right: 4px solid var(--nk-nut);
+  border-bottom: 4px solid var(--nk-nut);
   color: rgba(210,192,128,0.5);
   font-size: 8px;
 }
 
-/* ── String cells (horizontal fretboard) ─────────── */
+/* ── String cells (vertical fretboard) ─────────────── */
 .fn-cell {
   position: relative;
-  border-right: 1.5px solid var(--nk-fret);
+  border-bottom: 1.5px solid var(--nk-fret);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -860,25 +872,25 @@ body.show-notes .cell.fret-0::after { display: none; }
   -webkit-user-select: none;
   user-select: none;
 }
-/* Nut column: thick right border */
-.fn-nut-cell { border-right: 4px solid var(--nk-nut); }
+/* Nut row: thick bottom border */
+.fn-nut-cell { border-bottom: 4px solid var(--nk-nut); }
 
-/* String lines run HORIZONTALLY through each row */
+/* String lines run VERTICALLY through each column */
 .fn-cell::before {
   content: '';
   position: absolute;
-  left: 0; right: 0; top: 50%;
-  transform: translateY(-50%);
+  top: 0; bottom: 0; left: 50%;
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
 }
-/* String 0 = 6번줄 (thickest, bottom row), String 5 = 1번줄 (thinnest, top row) */
-.fn-cell[data-s="0"]::before { height: 3.2px; background: rgba(220,200,155,0.82); }
-.fn-cell[data-s="1"]::before { height: 2.5px; background: rgba(215,195,150,0.79); }
-.fn-cell[data-s="2"]::before { height: 1.9px; background: rgba(210,190,145,0.76); }
-.fn-cell[data-s="3"]::before { height: 1.5px; background: rgba(205,185,140,0.73); }
-.fn-cell[data-s="4"]::before { height: 1.2px; background: rgba(200,180,135,0.70); }
-.fn-cell[data-s="5"]::before { height: 0.9px; background: rgba(195,175,130,0.68); }
+/* s=0 = 6번줄 (leftmost, thickest), s=5 = 1번줄 (rightmost, thinnest) */
+.fn-cell[data-s="0"]::before { width: 3.2px; background: rgba(220,200,155,0.82); }
+.fn-cell[data-s="1"]::before { width: 2.5px; background: rgba(215,195,150,0.79); }
+.fn-cell[data-s="2"]::before { width: 1.9px; background: rgba(210,190,145,0.76); }
+.fn-cell[data-s="3"]::before { width: 1.5px; background: rgba(205,185,140,0.73); }
+.fn-cell[data-s="4"]::before { width: 1.2px; background: rgba(200,180,135,0.70); }
+.fn-cell[data-s="5"]::before { width: 0.9px; background: rgba(195,175,130,0.68); }
 .fn-cell.fn-in-box { background: rgba(88,166,255,0.05); }
 
 /* ── Note dots ───────────────────────────────────── */
@@ -895,12 +907,9 @@ body.show-notes .cell.fret-0::after { display: none; }
   color: #fff;
   pointer-events: none;
   flex-shrink: 0;
-  transform: rotate(-90deg);
   transition: transform 0.07s ease;
 }
-/* All scale notes: single teal color */
 .fn-scale .fn-dot { background: #2ec4b6; }
-/* Avoid notes: empty circle + X */
 .fn-avoid .fn-dot {
   background: transparent;
   border: 2px solid rgba(200,80,80,0.65);
@@ -910,34 +919,35 @@ body.show-notes .cell.fret-0::after { display: none; }
 .fn-cell:not(.fn-in-box) .fn-dot { opacity: 0.16; }
 .fn-cell.fn-pressed { background: rgba(88,166,255,0.12) !important; }
 .fn-cell.fn-pressed .fn-dot {
-  transform: rotate(-90deg) scale(1.22);
+  transform: scale(1.22);
   opacity: 1 !important;
   box-shadow: 0 0 16px rgba(255,255,255,0.55) !important;
 }
 
-/* ── Vertical slider (inside side panel) ─────────── */
-.fn-slider-wrap {
-  flex: 1;
-  width: 100%;
+/* ── Side vertical slider (up = fret 0 / nut, down = fret 22) ── */
+.fn-slider-wrap-v {
+  flex-shrink: 0;
+  width: 40px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 60px;
-  overflow: hidden;
+  /* top padding aligns the track with the viewport (str-row = 30px) */
+  padding: 30px 0 6px;
+  background: #110700;
+  border-left: 1px solid var(--nk-fret);
 }
 .fn-slider-v {
-  /* width set by JS = wrapper height; rotate(-90deg) makes it vertical */
-  /* top = min = fret 0 (nut), bottom = max (high fret)                 */
-  transform: rotate(-90deg);
-  height: 28px;
+  /* vertical-lr → minimum (fret 0) at top, maximum (fret 22) at bottom */
+  writing-mode: vertical-lr;
   -webkit-appearance: none;
   appearance: none;
+  width: 28px;
+  height: 100%;
   background: transparent;
   cursor: pointer;
-  flex-shrink: 0;
 }
 .fn-slider-v::-webkit-slider-runnable-track {
-  height: 4px;
+  width: 4px;
+  height: 100%;
   background: rgba(210,170,80,0.3);
   border-radius: 2px;
 }
@@ -945,7 +955,21 @@ body.show-notes .cell.fret-0::after { display: none; }
   -webkit-appearance: none;
   width: 22px;
   height: 22px;
-  margin-top: -9px;
+  margin-left: -9px;   /* center 22px thumb on 4px track */
+  border-radius: 50%;
+  background: var(--nk-nut);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.fn-slider-v::-moz-range-track {
+  width: 4px;
+  background: rgba(210,170,80,0.3);
+  border-radius: 2px;
+}
+.fn-slider-v::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: none;
   border-radius: 50%;
   background: var(--nk-nut);
   cursor: pointer;

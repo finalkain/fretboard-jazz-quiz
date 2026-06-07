@@ -1,5 +1,5 @@
 // Bump CACHE_VERSION whenever assets change so users get the update.
-const CACHE_VERSION = 'fretquiz-v12';
+const CACHE_VERSION = 'fretquiz-v14';
 const ASSETS = [
   './',
   './index.html',

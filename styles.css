@@ -911,10 +911,9 @@ body.show-notes .cell.fret-0::after { display: none; }
 }
 .fn-scale .fn-dot { background: #2ec4b6; }
 .fn-avoid .fn-dot {
-  background: transparent;
-  border: 2px solid rgba(200,80,80,0.65);
-  color: rgba(200,80,80,0.85);
-  font-size: 18px;
+  background: rgba(180,60,60,0.32);
+  border: 2px solid rgba(200,80,80,0.7);
+  color: #fff;
 }
 .fn-cell:not(.fn-in-box) .fn-dot { opacity: 0.16; }
 .fn-cell.fn-pressed { background: rgba(88,166,255,0.12) !important; }

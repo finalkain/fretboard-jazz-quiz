@@ -1022,13 +1022,9 @@ function renderFretNeck() {
       const tone = classifyTone(scale, idx);
       const dot = document.createElement('span');
       dot.className = 'fn-dot';
-      if (tone === 'avoid') {
-        cell.classList.add('fn-avoid');
-        dot.textContent = '×';
-      } else {
-        cell.classList.add('fn-scale');
-        dot.textContent = spellingToString(ctx.toneSpellings[idx]);
-      }
+      // 어보이드 음도 음 이름을 표시(스케일 구성음이므로). 색으로만 구분.
+      cell.classList.add(tone === 'avoid' ? 'fn-avoid' : 'fn-scale');
+      dot.textContent = spellingToString(ctx.toneSpellings[idx]);
       cell.appendChild(dot);
     }
   });

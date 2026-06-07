@@ -882,10 +882,11 @@ function startSustainedNote(midi, vel = 0.28) {
 }
 
 const FN_FRETS      = 22;
-const FN_NUT_H      = 30;
 const FN_RATIO      = Math.pow(2, -1 / 12);
 // 1프렛 칸 길이 = 기존 1+2+3프렛을 합친 길이(약 142px). 비율(FN_RATIO)은 유지.
 const FN_FRET1_H    = Math.round(50 * (1 + FN_RATIO + FN_RATIO * FN_RATIO));
+// 너트(0프렛) 칸도 같은 배율로 확대 — 기존 30:50 비율 유지
+const FN_NUT_H      = Math.round(30 * FN_FRET1_H / 50);
 const FN_INLAY_SNGL = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
 
 let fnInited  = false;

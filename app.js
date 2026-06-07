@@ -893,49 +893,53 @@ let fnOffset  = 0;
 const fnFingers = new Map();
 
 function buildFretNeck() {
-  const strRowEl   = document.getElementById('fnStrCol');
+  const strColEl   = document.getElementById('fnStrCol');
   const innerEl    = document.getElementById('fnInner');
   const viewportEl = document.getElementById('fnViewport');
 
-  // ── String label row (fixed top, horizontal) ──────
-  strRowEl.innerHTML = '';
+  // ── String label column (fixed left, vertical) ────
+  // After 90° CCW rotation: str1 (s=5) at top, str6 (s=0) at bottom
+  strColEl.innerHTML = '';
   const corner = document.createElement('div');
   corner.className = 'fn-str-corner';
-  strRowEl.appendChild(corner);
-  for (let s = 0; s < 6; s++) {
+  strColEl.appendChild(corner);
+  for (let s = 5; s >= 0; s--) {
     const lbl = document.createElement('div');
-    lbl.className = 'fn-str-lbl-h';
+    lbl.className = 'fn-str-lbl-v';
     lbl.textContent = 6 - s;
-    strRowEl.appendChild(lbl);
+    strColEl.appendChild(lbl);
   }
 
-  // ── Fret heights (guitar scale ratio, same as old widths) ──
-  const fretHs = [];
+  // ── Fret widths (guitar scale ratio) ──────────────
+  const fretWs = [];
   for (let f = 0; f <= FN_FRETS; f++)
-    fretHs.push(f === 0 ? FN_NUT_W : Math.round(FN_FRET1_W * Math.pow(FN_RATIO, f - 1)));
+    fretWs.push(f === 0 ? FN_NUT_W : Math.round(FN_FRET1_W * Math.pow(FN_RATIO, f - 1)));
   fnFretPos = [0];
-  fretHs.forEach(h => fnFretPos.push(fnFretPos[fnFretPos.length - 1] + h));
-  const totalH = fnFretPos[FN_FRETS + 1];
+  fretWs.forEach(w => fnFretPos.push(fnFretPos[fnFretPos.length - 1] + w));
+  const totalW = fnFretPos[FN_FRETS + 1];
 
-  // ── Inner grid: columns = [fret-num-col] + [6 strings]
-  //               rows    = fret 0 (nut) … fret 22 (top→bottom) ──
+  // ── Inner grid: rows = [fret-num-row] + [6 strings]
+  //               cols = fret 0 (nut, left) … fret 22 (right) ──
   innerEl.innerHTML = '';
-  innerEl.style.height = totalH + 'px';
-  innerEl.style.width  = '';
-  innerEl.style.gridTemplateColumns = `30px repeat(6, 1fr)`;
-  innerEl.style.gridTemplateRows    = fretHs.map(h => h + 'px').join(' ');
+  innerEl.style.width  = totalW + 'px';
+  innerEl.style.height = '';
+  innerEl.style.gridTemplateRows    = `30px repeat(6, 1fr)`;
+  innerEl.style.gridTemplateColumns = fretWs.map(w => w + 'px').join(' ');
 
+  // Top row: fret number cells
   for (let f = 0; f <= FN_FRETS; f++) {
-    // Left column: fret number label
     const fnumEl = document.createElement('div');
     fnumEl.className = 'fn-fnum-cell' + (f === 0 ? ' fn-nut-fnum' : '');
     if (f === 12)               fnumEl.classList.add('has-inlay-double');
     else if (FN_INLAY_SNGL.has(f)) fnumEl.classList.add('has-inlay');
     fnumEl.textContent = f === 0 ? '0' : f;
     innerEl.appendChild(fnumEl);
+  }
 
-    // String cells: s=0 (string 6, left) … s=5 (string 1, right)
-    for (let s = 0; s < 6; s++) {
+  // String rows: s=5 (str1, top) … s=0 (str6, bottom)
+  for (let row = 0; row < 6; row++) {
+    const s = 5 - row;
+    for (let f = 0; f <= FN_FRETS; f++) {
       const cell = document.createElement('div');
       cell.className = 'fn-cell' + (f === 0 ? ' fn-nut-cell' : '');
       cell.dataset.s = s;
@@ -944,34 +948,34 @@ function buildFretNeck() {
     }
   }
 
-  // Touch events (same as before — elementFromPoint works regardless of orientation)
+  // Touch events (elementFromPoint works regardless of orientation)
   innerEl.addEventListener('touchstart',  onFnTouchStart,  { passive: false });
   innerEl.addEventListener('touchmove',   onFnTouchMove,   { passive: false });
   innerEl.addEventListener('touchend',    onFnTouchEnd,    { passive: false });
   innerEl.addEventListener('touchcancel', onFnTouchEnd,    { passive: false });
 
-  // ── Slider: controls vertical scroll (fret 0 at top, higher frets below) ──
+  // ── Slider: controls horizontal scroll (fret 0 at left, higher frets right) ──
   const slider = document.getElementById('fnSlider');
   function refreshSliderMax() {
     if (!viewportEl || !fnFretPos) return;
-    const vh = viewportEl.clientHeight;
+    const vw = viewportEl.clientWidth;
     let maxFret = 0;
     for (let f = FN_FRETS; f >= 0; f--) {
-      if (fnFretPos[FN_FRETS + 1] - fnFretPos[f] >= vh) { maxFret = f; break; }
+      if (fnFretPos[FN_FRETS + 1] - fnFretPos[f] >= vw) { maxFret = f; break; }
     }
     slider.max = maxFret;
     const cur = Math.min(+slider.value, maxFret);
     if (cur !== +slider.value) {
       slider.value = cur;
       fnOffset = fnFretPos[cur];
-      innerEl.style.transform = `translateY(${-fnOffset}px)`;
+      innerEl.style.transform = `translateX(${-fnOffset}px)`;
       updateFnFretInfo();
     }
   }
   slider.addEventListener('input', () => {
     fnOffset = fnFretPos[+slider.value];
     innerEl.style.transition = 'none';
-    innerEl.style.transform  = `translateY(${-fnOffset}px)`;
+    innerEl.style.transform  = `translateX(${-fnOffset}px)`;
     updateFnFretInfo();
   });
   requestAnimationFrame(refreshSliderMax);
@@ -1010,10 +1014,16 @@ function renderFretNeck() {
     if (f >= box.start && f <= box.end) cell.classList.add('fn-in-box');
     cell.innerHTML = '';
     if (idx >= 0) {
-      cell.classList.add('fn-' + classifyTone(scale, idx));
+      const tone = classifyTone(scale, idx);
       const dot = document.createElement('span');
       dot.className = 'fn-dot';
-      dot.textContent = spellingToString(ctx.toneSpellings[idx]);
+      if (tone === 'avoid') {
+        cell.classList.add('fn-avoid');
+        dot.textContent = '×';
+      } else {
+        cell.classList.add('fn-scale');
+        dot.textContent = spellingToString(ctx.toneSpellings[idx]);
+      }
       cell.appendChild(dot);
     }
   });
@@ -1031,7 +1041,7 @@ function renderFretNeck() {
     slider.value = target;
     fnOffset = fnFretPos[target];
     const inner = document.getElementById('fnInner');
-    if (inner) { inner.style.transition = 'none'; inner.style.transform = `translateY(${-fnOffset}px)`; }
+    if (inner) { inner.style.transition = 'none'; inner.style.transform = `translateX(${-fnOffset}px)`; }
     updateFnFretInfo();
   }
 }

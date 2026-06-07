@@ -727,27 +727,27 @@ body.show-notes .cell.fret-0::after { display: none; }
   padding: 4px 6px;
 }
 
-/* ── Body: CSS grid — str-row top + viewport main + side-info right ── */
+/* ── Body: CSS grid — str-col left + viewport main + side-info right ── */
 .fn-body {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 40px;
-  grid-template-rows: 30px 1fr;
+  grid-template-columns: 30px 1fr 44px;
+  grid-template-rows: 1fr;
   min-height: 0;
   overflow: hidden;
 }
 
-/* String label row (top, column 1) */
-.fn-str-row {
+/* String label column (left, fixed) */
+.fn-str-col {
   grid-column: 1; grid-row: 1;
   display: grid;
-  grid-template-columns: 30px repeat(6, 1fr);
+  grid-template-rows: 30px repeat(6, 1fr);
   background: #0a0300;
-  border-bottom: 3px solid var(--nk-nut);
+  border-right: 3px solid var(--nk-nut);
   z-index: 3;
 }
 .fn-str-corner { background: #0a0300; }
-.fn-str-lbl-h {
+.fn-str-lbl-v {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -756,9 +756,9 @@ body.show-notes .cell.fret-0::after { display: none; }
   color: rgba(200,160,80,0.70);
 }
 
-/* Right info sidebar (key / scale / CAGED) — spans both rows */
+/* Right info sidebar (key / scale / CAGED) */
 .fn-side-info {
-  grid-column: 2; grid-row: 1 / 3;
+  grid-column: 3; grid-row: 1;
   background: #0a0300;
   border-left: 1px solid var(--nk-fret);
   display: flex;
@@ -800,28 +800,28 @@ body.show-notes .cell.fret-0::after { display: none; }
   letter-spacing: -0.5px;
 }
 
-/* ── Viewport (column 1, row 2) ────────────────────── */
+/* ── Viewport (column 2, row 1) ────────────────────── */
 .fn-viewport {
-  grid-column: 1; grid-row: 2;
+  grid-column: 2; grid-row: 1;
   overflow: hidden;
   position: relative;
   background: var(--nk-neck);
 }
 
-/* ── Inner grid: columns=strings, rows=frets ─────── */
+/* ── Inner grid: rows=strings, columns=frets ─────── */
 .fn-inner {
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0; left: 0; bottom: 0;
   display: grid;
-  grid-template-columns: 30px repeat(6, 1fr);
-  /* grid-template-rows set by JS (fret heights) */
+  grid-template-rows: 30px repeat(6, 1fr);
+  /* grid-template-columns set by JS (fret widths) */
   will-change: transform;
 }
 
-/* ── Fret number column (leftmost) ───────────────── */
+/* ── Fret number row (topmost) ───────────────────── */
 .fn-fnum-cell {
   background: #0a0300;
-  border-bottom: 1.5px solid var(--nk-fret);
+  border-right: 1.5px solid var(--nk-fret);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -835,21 +835,23 @@ body.show-notes .cell.fret-0::after { display: none; }
 .fn-fnum-cell.has-inlay::after {
   content: '•';
   position: absolute;
-  right: 3px;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 8px;
   color: var(--nk-inlay);
 }
 .fn-fnum-cell.has-inlay-double::after { content: '••'; font-size: 7px; }
 .fn-nut-fnum {
-  border-bottom: 4px solid var(--nk-nut);
+  border-right: 4px solid var(--nk-nut);
   color: rgba(210,192,128,0.5);
   font-size: 8px;
 }
 
-/* ── String cells (vertical fretboard) ───────────── */
+/* ── String cells (horizontal fretboard) ─────────── */
 .fn-cell {
   position: relative;
-  border-bottom: 1.5px solid var(--nk-fret);
+  border-right: 1.5px solid var(--nk-fret);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -858,25 +860,25 @@ body.show-notes .cell.fret-0::after { display: none; }
   -webkit-user-select: none;
   user-select: none;
 }
-/* Nut row: thick bottom border */
-.fn-nut-cell { border-bottom: 4px solid var(--nk-nut); }
+/* Nut column: thick right border */
+.fn-nut-cell { border-right: 4px solid var(--nk-nut); }
 
-/* String lines run VERTICALLY through each column */
+/* String lines run HORIZONTALLY through each row */
 .fn-cell::before {
   content: '';
   position: absolute;
-  top: 0; bottom: 0; left: 50%;
-  transform: translateX(-50%);
+  left: 0; right: 0; top: 50%;
+  transform: translateY(-50%);
   pointer-events: none;
   z-index: 0;
 }
-/* String 0 = 6번줄 (thickest), String 5 = 1번줄 (thinnest) */
-.fn-cell[data-s="0"]::before { width: 3.2px; background: rgba(220,200,155,0.82); }
-.fn-cell[data-s="1"]::before { width: 2.5px; background: rgba(215,195,150,0.79); }
-.fn-cell[data-s="2"]::before { width: 1.9px; background: rgba(210,190,145,0.76); }
-.fn-cell[data-s="3"]::before { width: 1.5px; background: rgba(205,185,140,0.73); }
-.fn-cell[data-s="4"]::before { width: 1.2px; background: rgba(200,180,135,0.70); }
-.fn-cell[data-s="5"]::before { width: 0.9px; background: rgba(195,175,130,0.68); }
+/* String 0 = 6번줄 (thickest, bottom row), String 5 = 1번줄 (thinnest, top row) */
+.fn-cell[data-s="0"]::before { height: 3.2px; background: rgba(220,200,155,0.82); }
+.fn-cell[data-s="1"]::before { height: 2.5px; background: rgba(215,195,150,0.79); }
+.fn-cell[data-s="2"]::before { height: 1.9px; background: rgba(210,190,145,0.76); }
+.fn-cell[data-s="3"]::before { height: 1.5px; background: rgba(205,185,140,0.73); }
+.fn-cell[data-s="4"]::before { height: 1.2px; background: rgba(200,180,135,0.70); }
+.fn-cell[data-s="5"]::before { height: 0.9px; background: rgba(195,175,130,0.68); }
 .fn-cell.fn-in-box { background: rgba(88,166,255,0.05); }
 
 /* ── Note dots ───────────────────────────────────── */
@@ -893,34 +895,35 @@ body.show-notes .cell.fret-0::after { display: none; }
   color: #fff;
   pointer-events: none;
   flex-shrink: 0;
+  transform: rotate(-90deg);
   transition: transform 0.07s ease;
 }
-.fn-root    .fn-dot { background: var(--accent); width: 52px; height: 52px; font-size: 14px; box-shadow: 0 0 14px rgba(88,166,255,0.65); }
-.fn-chord   .fn-dot { background: #2ec4b6; }
-.fn-tension .fn-dot { background: var(--warn); }
-.fn-avoid   .fn-dot { background: var(--bad); opacity: 0.45; }
+/* All scale notes: single teal color */
+.fn-scale .fn-dot { background: #2ec4b6; }
+/* Avoid notes: empty circle + X */
+.fn-avoid .fn-dot {
+  background: transparent;
+  border: 2px solid rgba(200,80,80,0.65);
+  color: rgba(200,80,80,0.85);
+  font-size: 18px;
+}
 .fn-cell:not(.fn-in-box) .fn-dot { opacity: 0.16; }
 .fn-cell.fn-pressed { background: rgba(88,166,255,0.12) !important; }
 .fn-cell.fn-pressed .fn-dot {
-  transform: scale(1.22);
+  transform: rotate(-90deg) scale(1.22);
   opacity: 1 !important;
   box-shadow: 0 0 16px rgba(255,255,255,0.55) !important;
 }
 
-/* ── Navigation slider ───────────────────────────── */
-.fn-nav-row {
-  display: flex;
-  align-items: center;
-  padding: 4px 10px 6px;
-  background: #0c0400;
-  border-top: 1px solid var(--nk-fret);
-  flex-shrink: 0;
-}
-.fn-slider {
+/* ── Vertical slider (inside side panel) ─────────── */
+.fn-slider-v {
+  writing-mode: vertical-lr;
   flex: 1;
+  width: 30px;
+  min-height: 60px;
   accent-color: var(--nk-nut);
   cursor: pointer;
-  height: 24px;
+  margin: 6px 0 4px;
 }
 
 /* ── Portrait rotate hint (non-blocking) ─────────── */

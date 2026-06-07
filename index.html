@@ -140,10 +140,10 @@
     <button id="fnFullscreenBtn" class="icon-btn fn-fs-btn" aria-label="전체화면">⛶</button>
   </header>
 
-  <!-- Neck body: vertical fretboard (nut top, high frets bottom) -->
+  <!-- Neck body: horizontal fretboard (nut left, high frets right) -->
   <div class="fn-body">
-    <!-- String labels row (fixed top) + side-info (right, spans full height) -->
-    <div class="fn-str-row" id="fnStrCol"></div>
+    <!-- String labels column (fixed left) -->
+    <div class="fn-str-col" id="fnStrCol"></div>
     <div class="fn-viewport" id="fnViewport">
       <div class="fn-inner" id="fnInner"></div>
     </div>
@@ -151,12 +151,8 @@
       <button id="fnKeyBtn"   class="fn-side-btn fn-key-btn">A</button>
       <button id="fnScaleBtn" class="fn-side-btn fn-scale-btn">메이저</button>
       <button id="fnShapeBtn" class="fn-side-btn fn-shape-btn">E형</button>
+      <input type="range" id="fnSlider" class="fn-slider-v" min="0" max="17" value="0" step="1">
     </div>
-  </div>
-
-  <!-- Navigation slider -->
-  <div class="fn-nav-row">
-    <input type="range" id="fnSlider" class="fn-slider" min="0" max="17" value="0" step="1">
   </div>
 
   <!-- Key picker dialog -->

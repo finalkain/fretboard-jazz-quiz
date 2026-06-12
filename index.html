@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=23">
+<link rel="stylesheet" href="styles.css?v=24">
 </head>
 <body data-view="home">
 
@@ -93,6 +93,14 @@
 
   <main class="scan-main">
     <input type="file" id="scanFile" accept="image/*" capture="environment" hidden>
+
+    <div class="scan-lib">
+      <select id="scanBook" class="scan-select" aria-label="책 선택"></select>
+      <button id="scanAddBook" type="button" class="scan-mini-btn">＋책</button>
+      <input id="scanPage" type="number" min="1" inputmode="numeric" placeholder="페이지" class="scan-page">
+      <button id="scanLoad" type="button" class="scan-mini-btn">불러오기</button>
+      <button id="scanSave" type="button" class="scan-mini-btn save">저장</button>
+    </div>
 
     <div class="scan-preview-wrap">
       <img id="scanPreview" class="scan-preview" alt="선택한 악보" hidden>
@@ -257,7 +265,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=23"></script>
+<script src="app.js?v=24"></script>
 <script>
 if ('serviceWorker' in navigator) {
   let reloading = false;

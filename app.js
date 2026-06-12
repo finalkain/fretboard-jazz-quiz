@@ -1169,6 +1169,43 @@ document.getElementById('homeHelpBtn').addEventListener('click', openHelp);
 const SCAN_KEY_LS = 'anthropicApiKey';
 let scanInited = false;
 let scanImage  = null;   // { mediaType, data(base64) }
+let lastScan   = null;   // 마지막으로 표시된 결과(저장용)
+
+// 책/페이지별 캐시 (localStorage)
+const getBooks   = () => { try { return JSON.parse(localStorage.getItem('scanBooks')   || '[]'); } catch (_) { return []; } };
+const setBooks   = (b) => localStorage.setItem('scanBooks', JSON.stringify(b));
+const getLibrary = () => { try { return JSON.parse(localStorage.getItem('scanLibrary') || '{}'); } catch (_) { return {}; } };
+const setLibrary = (l) => localStorage.setItem('scanLibrary', JSON.stringify(l));
+const libKey     = (bookId, page) => bookId + '|' + String(page).trim();
+
+function refreshBookSelect() {
+  const sel = document.getElementById('scanBook');
+  if (!sel) return;
+  const books = getBooks();
+  const cur = sel.value;
+  sel.innerHTML = '';
+  if (!books.length) {
+    const o = document.createElement('option');
+    o.value = ''; o.textContent = '책 없음 — ＋책'; sel.appendChild(o);
+    return;
+  }
+  books.forEach(bk => {
+    const o = document.createElement('option');
+    o.value = bk.id; o.textContent = bk.name; sel.appendChild(o);
+  });
+  if (cur && books.some(b => b.id === cur)) sel.value = cur;
+}
+
+// 코드 전체를 한꺼번에(가벼운 스트럼) 재생
+function playChord(positions) {
+  const ord = (positions || [])
+    .filter(p => { const i = 6 - (+p.string); return i >= 0 && i < 6; })
+    .sort((a, b) => (+b.string) - (+a.string));   // 6번줄(저음) → 1번줄(고음)
+  ord.forEach((pos, i) => {
+    const idx = 6 - (+pos.string);
+    playNote(STRING_OPEN_MIDI[idx] + (+pos.fret), i * 0.04, 1.8, 0.24);
+  });
+}
 
 // 따옴표/공백/줄바꿈이 섞여 들어와도 정리 (Anthropic 키엔 공백이 없음)
 const cleanKey  = (s) => (s || '').replace(/^[\s'"`]+|[\s'"`]+$/g, '').replace(/\s+/g, '');
@@ -1289,6 +1326,46 @@ function initScan() {
     else if (!k.startsWith('sk-ant')) setScanStatus('저장됨 — 다만 키가 sk-ant- 로 시작하지 않아요. 다시 확인해 주세요.', true);
     else setScanStatus('API 키가 저장되었습니다.');
   });
+
+  // ── 책/페이지 캐시 ──
+  refreshBookSelect();
+  const bookSel = document.getElementById('scanBook');
+  const pageInp = document.getElementById('scanPage');
+  const bookName = () => (getBooks().find(b => b.id === bookSel.value) || {}).name || '책';
+
+  document.getElementById('scanAddBook').addEventListener('click', () => {
+    const name = (prompt('책 이름을 입력하세요') || '').trim();
+    if (!name) return;
+    const books = getBooks();
+    const id = 'b' + Date.now();
+    books.push({ id, name });
+    setBooks(books);
+    refreshBookSelect();
+    bookSel.value = id;
+    setScanStatus('책 추가됨: ' + name);
+  });
+
+  document.getElementById('scanSave').addEventListener('click', () => {
+    if (!bookSel.value) { setScanStatus('먼저 ＋책으로 책을 추가/선택하세요.', true); return; }
+    const page = (pageInp.value || '').trim();
+    if (!page) { setScanStatus('페이지를 입력하세요.', true); return; }
+    if (!lastScan || !(lastScan.chords || []).length) { setScanStatus('저장할 결과가 없어요. 먼저 분석하세요.', true); return; }
+    const lib = getLibrary();
+    lib[libKey(bookSel.value, page)] = lastScan;
+    setLibrary(lib);
+    setScanStatus(`저장됨: ${bookName()} ${page}p`);
+  });
+
+  document.getElementById('scanLoad').addEventListener('click', () => {
+    if (!bookSel.value) { setScanStatus('책을 선택하세요.', true); return; }
+    const page = (pageInp.value || '').trim();
+    if (!page) { setScanStatus('페이지를 입력하세요.', true); return; }
+    const entry = getLibrary()[libKey(bookSel.value, page)];
+    if (!entry) { setScanStatus(`저장된 결과가 없어요: ${bookName()} ${page}p`, true); return; }
+    lastScan = entry;
+    renderScanResult(entry);
+    setScanStatus(`불러옴: ${bookName()} ${page}p`);
+  });
 }
 
 async function runScan() {
@@ -1343,6 +1420,7 @@ async function runScan() {
 }
 
 function renderScanResult(parsed) {
+  lastScan = parsed || null;
   const el = document.getElementById('scanResult');
   el.innerHTML = '';
   const chords = (parsed && parsed.chords) || [];
@@ -1357,18 +1435,28 @@ function renderScanResult(parsed) {
 
       const head = document.createElement('div');
       head.className = 'scan-chord-head';
+      const main = document.createElement('div');
+      main.className = 'scan-chord-main';
       const sym = document.createElement('div');
       sym.className = 'scan-chord-sym';
       sym.textContent = c.symbol || '?';
       const notes = document.createElement('div');
       notes.className = 'scan-chord-notes';
       notes.textContent = (c.notes || []).join(' · ');
-      head.append(sym, notes);
+      main.append(sym, notes);
+      head.appendChild(main);
       card.appendChild(head);
 
       const positions = c.positions || [];
       if (positions.length) {
         card.classList.add('has-pos');
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'scan-chord-play';
+        playBtn.textContent = '🔊';
+        playBtn.title = '코드 전체 듣기';
+        playBtn.addEventListener('click', (e) => { e.stopPropagation(); playChord(positions); });
+        head.appendChild(playBtn);
         const detail = document.createElement('div');
         detail.className = 'scan-chord-detail';
         positions.forEach(pos => {

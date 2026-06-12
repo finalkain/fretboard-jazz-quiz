@@ -1046,6 +1046,24 @@ body.show-notes .cell.fret-0::after { display: none; }
   gap: 14px;
   padding: 14px;
 }
+.scan-lib { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.scan-select {
+  flex: 1; min-width: 120px;
+  background: var(--bg-elev-2); border: 1px solid var(--fret-line); color: var(--fg);
+  border-radius: 8px; padding: 9px 10px; font-size: 14px; font-family: inherit;
+}
+.scan-page {
+  width: 84px; box-sizing: border-box;
+  background: var(--bg-elev-2); border: 1px solid var(--fret-line); color: var(--fg);
+  border-radius: 8px; padding: 9px 10px; font-size: 14px; font-family: inherit;
+}
+.scan-mini-btn {
+  background: var(--bg-elev-2); border: 1px solid var(--fret-line); color: var(--fg);
+  border-radius: 8px; padding: 9px 12px; font-size: 13px; font-weight: 600;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.scan-mini-btn.save { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
+.scan-mini-btn:active { background: var(--accent-dim); }
 .scan-preview-wrap {
   border: 1px dashed var(--fret-line);
   border-radius: 12px;
@@ -1088,7 +1106,7 @@ body.show-notes .cell.fret-0::after { display: none; }
 .scan-result { display: flex; flex-direction: column; gap: 12px; }
 .scan-chord-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
   gap: 10px;
 }
 .scan-chord {
@@ -1100,8 +1118,21 @@ body.show-notes .cell.fret-0::after { display: none; }
   flex-direction: column;
   gap: 4px;
 }
-.scan-chord-head { display: flex; flex-direction: column; gap: 4px; }
+.scan-chord-head { display: flex; align-items: center; gap: 10px; }
+.scan-chord-main { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
 .scan-chord.has-pos .scan-chord-head { cursor: pointer; }
+.scan-chord-play {
+  flex-shrink: 0;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.scan-chord-play:active { background: var(--accent); }
 .scan-chord-sym { font-size: 19px; font-weight: 800; color: var(--accent); }
 .scan-chord.has-pos .scan-chord-sym::after { content: ' ▾'; font-size: 11px; color: var(--fg-dim, #8b949e); }
 .scan-chord.open .scan-chord-sym::after { content: ' ▴'; }

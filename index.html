@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=21">
+<link rel="stylesheet" href="styles.css?v=22">
 </head>
 <body data-view="home">
 
@@ -116,7 +116,11 @@
     <form method="dialog">
       <h3 class="fn-dialog-title">Anthropic API 키</h3>
       <p class="scan-key-note">키는 이 브라우저(localStorage)에만 저장되며, 분석할 때 api.anthropic.com 으로만 전송됩니다.</p>
-      <input type="password" id="scanKeyInput" class="scan-key-input" placeholder="sk-ant-..." autocomplete="off">
+      <div class="scan-key-row">
+        <input type="text" id="scanKeyInput" class="scan-key-input" placeholder="sk-ant-..."
+               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" id="scanKeyPaste" class="primary-btn ghost scan-paste-btn">📋 붙여넣기</button>
+      </div>
       <div class="dialog-actions">
         <button value="cancel" class="primary-btn ghost" type="submit">취소</button>
         <button value="save" class="primary-btn" type="submit">저장</button>
@@ -251,7 +255,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=21"></script>
+<script src="app.js?v=22"></script>
 <script>
 if ('serviceWorker' in navigator) {
   let reloading = false;

@@ -1181,9 +1181,12 @@ function setScanStatus(msg, isErr) {
 
 const SCAN_PROMPT =
 `당신은 기타 타브(TAB)와 악보를 읽는 전문가입니다.
-이미지의 기타 타브 또는 악보를 분석해 연주되는 코드를 추출하세요.
+이미지에 보이는 타브/악보 전체를 처음부터 끝까지 빠짐없이 훑어, 등장하는 모든 코드를 한 번에 추출하세요.
+- 왼쪽→오른쪽, 위 줄→아래 줄 순서로 마디를 따라가며 누락 없이 모두 나열하세요.
+- 같은 코드가 반복되면 반복된 횟수만큼 모두 포함하세요(중복을 합치지 마세요).
 - 코드 기호가 적혀 있으면 그대로 읽고, 타브 숫자만 있으면 동시에 눌리는 음으로 코드를 추정하세요.
-- 각 코드의 이름(예: Cmaj7, G, Am7, D7)과 구성음을 등장 순서대로 제시하세요.
+- 각 코드의 이름(예: Cmaj7, G, Am7, D7)과 구성음을 제시하세요.
+- 타브에 줄/프렛 숫자가 있으면 각 음의 위치를 positions에 담으세요: string은 줄 번호(6=가장 굵은 저음 E … 1=가장 얇은 고음 E), fret은 프렛 번호, note는 그 위치의 실제 음. 코드 기호만 있고 타브가 없으면 positions는 빈 배열로 두세요.
 - 코드를 찾지 못하면 chords를 빈 배열로 두고 summary에 이유를 적으세요.`;
 
 const SCAN_SCHEMA = {
@@ -1196,8 +1199,21 @@ const SCAN_SCHEMA = {
         properties: {
           symbol: { type: 'string' },
           notes:  { type: 'array', items: { type: 'string' } },
+          positions: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                string: { type: 'integer' },   // 6 = lowest E … 1 = highest E
+                fret:   { type: 'integer' },
+                note:   { type: 'string' },
+              },
+              required: ['string', 'fret', 'note'],
+              additionalProperties: false,
+            },
+          },
         },
-        required: ['symbol', 'notes'],
+        required: ['symbol', 'notes', 'positions'],
         additionalProperties: false,
       },
     },
@@ -1219,6 +1235,18 @@ function initScan() {
   const keyBtn     = document.getElementById('scanKeyBtn');
   const keyDialog  = document.getElementById('scanKeyDialog');
   const keyInput   = document.getElementById('scanKeyInput');
+  const pasteBtn   = document.getElementById('scanKeyPaste');
+
+  pasteBtn.addEventListener('click', async () => {
+    try {
+      const t = await navigator.clipboard.readText();
+      if (t) keyInput.value = t.trim();
+      keyInput.focus();
+    } catch (_) {
+      keyInput.focus();
+      keyInput.placeholder = '입력칸을 길게 눌러 붙여넣기 하세요';
+    }
+  });
 
   shootBtn.addEventListener('click', () => fileEl.click());
 
@@ -1278,7 +1306,7 @@ async function runScan() {
       },
       body: JSON.stringify({
         model: 'claude-opus-4-8',
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [{
           role: 'user',
           content: [
@@ -1318,13 +1346,42 @@ function renderScanResult(parsed) {
     chords.forEach(c => {
       const card = document.createElement('div');
       card.className = 'scan-chord';
+
+      const head = document.createElement('div');
+      head.className = 'scan-chord-head';
       const sym = document.createElement('div');
       sym.className = 'scan-chord-sym';
       sym.textContent = c.symbol || '?';
       const notes = document.createElement('div');
       notes.className = 'scan-chord-notes';
       notes.textContent = (c.notes || []).join(' · ');
-      card.append(sym, notes);
+      head.append(sym, notes);
+      card.appendChild(head);
+
+      const positions = c.positions || [];
+      if (positions.length) {
+        card.classList.add('has-pos');
+        const detail = document.createElement('div');
+        detail.className = 'scan-chord-detail';
+        positions.forEach(pos => {
+          const row = document.createElement('button');
+          row.type = 'button';
+          row.className = 'scan-pos';
+          row.innerHTML =
+            `<span class="scan-pos-loc">${pos.string}번줄 ${pos.fret}프렛</span>` +
+            `<span class="scan-pos-note">${pos.note}</span>`;
+          row.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = 6 - (+pos.string);   // string 6→idx0 (low E) … 1→idx5
+            if (idx >= 0 && idx < 6) playNote(STRING_OPEN_MIDI[idx] + (+pos.fret), 0, 0.9, 0.3);
+            row.classList.add('playing');
+            setTimeout(() => row.classList.remove('playing'), 250);
+          });
+          detail.appendChild(row);
+        });
+        card.appendChild(detail);
+        head.addEventListener('click', () => card.classList.toggle('open'));
+      }
       list.appendChild(card);
     });
     el.appendChild(list);

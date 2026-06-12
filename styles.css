@@ -1089,8 +1089,40 @@ body.show-notes .cell.fret-0::after { display: none; }
   flex-direction: column;
   gap: 4px;
 }
+.scan-chord-head { display: flex; flex-direction: column; gap: 4px; }
+.scan-chord.has-pos .scan-chord-head { cursor: pointer; }
 .scan-chord-sym { font-size: 19px; font-weight: 800; color: var(--accent); }
+.scan-chord.has-pos .scan-chord-sym::after { content: ' ▾'; font-size: 11px; color: var(--fg-dim, #8b949e); }
+.scan-chord.open .scan-chord-sym::after { content: ' ▴'; }
 .scan-chord-notes { font-size: 12px; color: var(--fg-dim, #8b949e); }
+/* expanded card spans the full row so tab positions are readable */
+.scan-chord.open { grid-column: 1 / -1; }
+.scan-chord-detail {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--fret-line);
+}
+.scan-chord.open .scan-chord-detail { display: flex; }
+.scan-pos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--fret-line);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 80ms ease;
+}
+.scan-pos.playing { background: var(--accent-dim); border-color: var(--accent); }
+.scan-pos-note { font-weight: 800; color: var(--accent); }
 .scan-summary {
   font-size: 13px;
   line-height: 1.5;
@@ -1102,8 +1134,10 @@ body.show-notes .cell.fret-0::after { display: none; }
 }
 .scan-empty { font-size: 14px; color: var(--fg-dim, #8b949e); text-align: center; padding: 20px; }
 .scan-key-note { font-size: 12px; color: var(--fg-dim, #8b949e); line-height: 1.5; margin: 0 0 12px; }
+.scan-key-row { display: flex; gap: 8px; margin-bottom: 14px; }
 .scan-key-input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   box-sizing: border-box;
   background: var(--bg-elev-2);
   border: 1px solid var(--fret-line);
@@ -1112,6 +1146,6 @@ body.show-notes .cell.fret-0::after { display: none; }
   padding: 11px 12px;
   font-size: 14px;
   font-family: inherit;
-  margin-bottom: 14px;
 }
+.scan-paste-btn { flex-shrink: 0; padding: 9px 12px; font-size: 13px; white-space: nowrap; }
 

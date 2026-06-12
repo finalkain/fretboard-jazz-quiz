@@ -766,12 +766,12 @@ body.show-notes .cell.fret-0::after { display: none; }
   color: rgba(200,160,80,0.70);
 }
 
-/* Right info sidebar */
+/* Left info sidebar */
 .fn-side-info {
   flex-shrink: 0;
   width: 44px;
   background: #0a0300;
-  border-left: 1px solid var(--nk-fret);
+  border-right: 1px solid var(--nk-fret);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -932,7 +932,7 @@ body.show-notes .cell.fret-0::after { display: none; }
   /* top padding aligns the track with the viewport (str-row = 30px) */
   padding: 30px 0 6px;
   background: #110700;
-  border-left: 1px solid var(--nk-fret);
+  border-right: 1px solid var(--nk-fret);
 }
 .fn-slider-v {
   /* vertical-lr → minimum (fret 0) at top, maximum (fret 22) at bottom */

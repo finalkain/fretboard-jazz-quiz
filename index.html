@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=19">
+<link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body data-view="home">
 
@@ -142,22 +142,22 @@
 
   <!-- Neck body: vertical fretboard (str6 left→str1 right, nut top→high fret bottom) -->
   <div class="fn-body">
+    <!-- Left info sidebar: key / scale / CAGED -->
+    <div class="fn-side-info" id="fnSideInfo">
+      <button id="fnKeyBtn"   class="fn-side-btn fn-key-btn">A</button>
+      <button id="fnScaleBtn" class="fn-side-btn fn-scale-btn">메이저</button>
+      <button id="fnShapeBtn" class="fn-side-btn fn-shape-btn">E형</button>
+    </div>
+    <!-- Vertical fret slider: up = fret 0 (nut), down = fret 22 -->
+    <div class="fn-slider-wrap-v">
+      <input type="range" id="fnSlider" class="fn-slider-v" min="0" max="22" value="0" step="1">
+    </div>
     <!-- Neck area: string labels top + viewport -->
     <div class="fn-neck-area">
       <div class="fn-str-row" id="fnStrCol"></div>
       <div class="fn-viewport" id="fnViewport">
         <div class="fn-inner" id="fnInner"></div>
       </div>
-    </div>
-    <!-- Vertical fret slider: up = fret 0 (nut), down = fret 22 -->
-    <div class="fn-slider-wrap-v">
-      <input type="range" id="fnSlider" class="fn-slider-v" min="0" max="22" value="0" step="1">
-    </div>
-    <!-- Right info sidebar: key / scale / CAGED -->
-    <div class="fn-side-info" id="fnSideInfo">
-      <button id="fnKeyBtn"   class="fn-side-btn fn-key-btn">A</button>
-      <button id="fnScaleBtn" class="fn-side-btn fn-scale-btn">메이저</button>
-      <button id="fnShapeBtn" class="fn-side-btn fn-shape-btn">E형</button>
     </div>
   </div>
 
@@ -257,7 +257,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=19"></script>
+<script src="app.js?v=20"></script>
 <script>
 if ('serviceWorker' in navigator) {
   let reloading = false;

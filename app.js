@@ -1163,21 +1163,182 @@ function initFretNeck() {
   renderFretNeck();
 }
 
-// Scale view play buttons
-document.getElementById('scaleAscBtn').addEventListener('click', playScaleAsc);
-document.getElementById('scaleDescBtn').addEventListener('click', playScaleDesc);
-document.getElementById('scaleChordBtn').addEventListener('click', playScaleChord);
-
-
-const scaleHelpDialog = document.getElementById('scaleHelpDialog');
-document.getElementById('scaleHelpBtn').addEventListener('click', () => {
-  if (typeof scaleHelpDialog.showModal === 'function') scaleHelpDialog.showModal();
-  else scaleHelpDialog.setAttribute('open', '');
-});
 document.getElementById('homeHelpBtn').addEventListener('click', openHelp);
 
+// ── Score Scan (camera → Claude vision → chords) ──────────────
+const SCAN_KEY_LS = 'anthropicApiKey';
+let scanInited = false;
+let scanImage  = null;   // { mediaType, data(base64) }
+
+const getScanKey = () => (localStorage.getItem(SCAN_KEY_LS) || '').trim();
+
+function setScanStatus(msg, isErr) {
+  const el = document.getElementById('scanStatus');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.classList.toggle('error', !!isErr);
+}
+
+const SCAN_PROMPT =
+`당신은 기타 타브(TAB)와 악보를 읽는 전문가입니다.
+이미지의 기타 타브 또는 악보를 분석해 연주되는 코드를 추출하세요.
+- 코드 기호가 적혀 있으면 그대로 읽고, 타브 숫자만 있으면 동시에 눌리는 음으로 코드를 추정하세요.
+- 각 코드의 이름(예: Cmaj7, G, Am7, D7)과 구성음을 등장 순서대로 제시하세요.
+- 코드를 찾지 못하면 chords를 빈 배열로 두고 summary에 이유를 적으세요.`;
+
+const SCAN_SCHEMA = {
+  type: 'object',
+  properties: {
+    chords: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          symbol: { type: 'string' },
+          notes:  { type: 'array', items: { type: 'string' } },
+        },
+        required: ['symbol', 'notes'],
+        additionalProperties: false,
+      },
+    },
+    summary: { type: 'string' },
+  },
+  required: ['chords', 'summary'],
+  additionalProperties: false,
+};
+
+function initScan() {
+  if (scanInited) return;
+  scanInited = true;
+
+  const fileEl     = document.getElementById('scanFile');
+  const shootBtn   = document.getElementById('scanShootBtn');
+  const runBtn     = document.getElementById('scanRunBtn');
+  const preview    = document.getElementById('scanPreview');
+  const placeholder= document.getElementById('scanPlaceholder');
+  const keyBtn     = document.getElementById('scanKeyBtn');
+  const keyDialog  = document.getElementById('scanKeyDialog');
+  const keyInput   = document.getElementById('scanKeyInput');
+
+  shootBtn.addEventListener('click', () => fileEl.click());
+
+  fileEl.addEventListener('change', () => {
+    const f = fileEl.files && fileEl.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result;
+      const m = /^data:(.*?);base64,(.*)$/.exec(url);
+      if (!m) { setScanStatus('이미지를 읽지 못했어요.', true); return; }
+      preview.src = url; preview.hidden = false;
+      placeholder.hidden = true;
+      scanImage = { mediaType: m[1], data: m[2] };
+      runBtn.disabled = false;
+      setScanStatus('');
+      document.getElementById('scanResult').innerHTML = '';
+    };
+    reader.readAsDataURL(f);
+  });
+
+  runBtn.addEventListener('click', runScan);
+
+  keyBtn.addEventListener('click', () => {
+    keyInput.value = getScanKey();
+    if (keyDialog.showModal) keyDialog.showModal(); else keyDialog.setAttribute('open', '');
+    keyInput.focus();
+  });
+  keyDialog.addEventListener('close', () => {
+    if (keyDialog.returnValue === 'save') {
+      localStorage.setItem(SCAN_KEY_LS, keyInput.value.trim());
+      setScanStatus(getScanKey() ? 'API 키가 저장되었습니다.' : 'API 키가 비워졌습니다.');
+    }
+  });
+}
+
+async function runScan() {
+  const key = getScanKey();
+  if (!key) {
+    setScanStatus('먼저 🔑 버튼으로 API 키를 입력하세요.', true);
+    document.getElementById('scanKeyBtn').click();
+    return;
+  }
+  if (!scanImage) { setScanStatus('먼저 사진을 촬영/선택하세요.', true); return; }
+
+  const runBtn = document.getElementById('scanRunBtn');
+  runBtn.disabled = true;
+  setScanStatus('분석 중… (수 초 걸릴 수 있어요)');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-8',
+        max_tokens: 4096,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: scanImage.mediaType, data: scanImage.data } },
+            { type: 'text', text: SCAN_PROMPT },
+          ],
+        }],
+        output_config: { format: { type: 'json_schema', schema: SCAN_SCHEMA } },
+      }),
+    });
+    if (!res.ok) {
+      let detail = 'HTTP ' + res.status;
+      try { const e = await res.json(); detail = e.error?.message || detail; } catch (_) {}
+      throw new Error(detail);
+    }
+    const data = await res.json();
+    const textBlock = (data.content || []).find(b => b.type === 'text');
+    if (!textBlock) throw new Error('응답을 해석하지 못했어요.');
+    renderScanResult(JSON.parse(textBlock.text));
+    setScanStatus('');
+  } catch (err) {
+    setScanStatus('분석 실패: ' + (err.message || err), true);
+  } finally {
+    runBtn.disabled = false;
+  }
+}
+
+function renderScanResult(parsed) {
+  const el = document.getElementById('scanResult');
+  el.innerHTML = '';
+  const chords = (parsed && parsed.chords) || [];
+  if (!chords.length) {
+    el.innerHTML = '<div class="scan-empty">코드를 찾지 못했어요. 더 또렷한 사진으로 다시 시도해 보세요.</div>';
+  } else {
+    const list = document.createElement('div');
+    list.className = 'scan-chord-list';
+    chords.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'scan-chord';
+      const sym = document.createElement('div');
+      sym.className = 'scan-chord-sym';
+      sym.textContent = c.symbol || '?';
+      const notes = document.createElement('div');
+      notes.className = 'scan-chord-notes';
+      notes.textContent = (c.notes || []).join(' · ');
+      card.append(sym, notes);
+      list.appendChild(card);
+    });
+    el.appendChild(list);
+  }
+  if (parsed && parsed.summary) {
+    const s = document.createElement('div');
+    s.className = 'scan-summary';
+    s.textContent = parsed.summary;
+    el.appendChild(s);
+  }
+}
+
 // ── View navigation ───────────────────────────
-const VALID_VIEWS = ['home','quiz','scales','practice'];
+const VALID_VIEWS = ['home','quiz','scan','practice'];
 function setView(name) {
   if (!VALID_VIEWS.includes(name)) name = 'home';
   const prev = document.body.dataset.view;
@@ -1191,7 +1352,7 @@ function setView(name) {
     try { screen.orientation?.unlock?.(); } catch (_) {}
   }
 
-  if (name === 'scales')   initScaleViewer();
+  if (name === 'scan')     initScan();
   if (name === 'practice') initFretNeck();
   if (name === 'quiz' && !localStorage.getItem(FIRST_RUN_KEY)) {
     setTimeout(() => { openHelp(); localStorage.setItem(FIRST_RUN_KEY, '1'); }, 200);

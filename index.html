@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=20">
+<link rel="stylesheet" href="styles.css?v=21">
 </head>
 <body data-view="home">
 
@@ -26,10 +26,10 @@
       <span class="card-title">코드 맞추기</span>
       <span class="card-sub">재즈 코드의 구성음을 지판에서 찾기</span>
     </button>
-    <button class="menu-card" data-go="scales" type="button">
-      <span class="card-icon">🎼</span>
-      <span class="card-title">스케일 보기</span>
-      <span class="card-sub">CAGED 5가지 모양으로 스케일 학습</span>
+    <button class="menu-card" data-go="scan" type="button">
+      <span class="card-icon">📷</span>
+      <span class="card-title">악보 스캔</span>
+      <span class="card-sub">타브/악보를 찍으면 코드를 알려줘요</span>
     </button>
     <button class="menu-card" data-go="practice" type="button">
       <span class="card-icon">🎵</span>
@@ -83,52 +83,46 @@
   </section>
 </div>
 
-<!-- ── SCALES ───────────────────────────────────────── -->
-<div class="view" id="view-scales">
+<!-- ── SCAN (악보/타브 → 코드) ───────────────────────── -->
+<div class="view" id="view-scan">
   <header class="topbar">
     <button class="icon-btn" data-back aria-label="메인으로">←</button>
-    <span class="topbar-title">스케일</span>
-    <button id="scaleHelpBtn" class="icon-btn" aria-label="도움말">?</button>
+    <span class="topbar-title">악보 스캔</span>
+    <button id="scanKeyBtn" class="icon-btn" aria-label="API 키 설정">🔑</button>
   </header>
 
-  <section class="scale-pickers">
-    <div class="picker-group">
-      <div class="picker-label">루트</div>
-      <div id="scaleRootList" class="chip-row"></div>
-    </div>
-    <div class="picker-group">
-      <div class="picker-label">스케일</div>
-      <div id="scaleTypeList" class="chip-row scrollx"></div>
-    </div>
-    <div class="picker-group">
-      <div class="picker-label">CAGED 모양</div>
-      <div id="scaleShapeList" class="chip-row shape-row"></div>
-    </div>
-  </section>
+  <main class="scan-main">
+    <input type="file" id="scanFile" accept="image/*" capture="environment" hidden>
 
-  <section class="scale-summary">
-    <span id="scaleSummary" class="scale-summary-text">—</span>
-    <span class="scale-legend">
-      <span class="legend-dot dot-root"></span>R
-      <span class="legend-dot dot-chord"></span>코드톤
-      <span class="legend-dot dot-tension"></span>텐션
-      <span class="legend-dot dot-avoid"></span>어보이드
-    </span>
-  </section>
-
-  <section class="fretboard-wrap">
-    <div class="fretboard-legend">
-      <span>← 0프렛 · 12프렛 →</span>
-      <span>위=6번 · 아래=1번</span>
+    <div class="scan-preview-wrap">
+      <img id="scanPreview" class="scan-preview" alt="선택한 악보" hidden>
+      <div id="scanPlaceholder" class="scan-placeholder">
+        <span class="scan-ph-icon">🎸</span>
+        <span>타브/악보 사진을 찍거나 선택하세요</span>
+      </div>
     </div>
-    <div class="fretboard" id="scaleFretboard" aria-label="스케일 지판"></div>
-  </section>
 
-  <section class="scale-actions">
-    <button id="scaleAscBtn" class="primary-btn">♪ 상행</button>
-    <button id="scaleDescBtn" class="primary-btn">♪ 하행</button>
-    <button id="scaleChordBtn" class="primary-btn ghost">♬ 동시</button>
-  </section>
+    <div class="scan-actions">
+      <button id="scanShootBtn" class="primary-btn">📷 촬영 / 선택</button>
+      <button id="scanRunBtn" class="primary-btn" disabled>🔍 코드 분석</button>
+    </div>
+
+    <div id="scanStatus" class="scan-status"></div>
+    <div id="scanResult" class="scan-result"></div>
+  </main>
+
+  <!-- API 키 입력 -->
+  <dialog id="scanKeyDialog" class="fn-dialog">
+    <form method="dialog">
+      <h3 class="fn-dialog-title">Anthropic API 키</h3>
+      <p class="scan-key-note">키는 이 브라우저(localStorage)에만 저장되며, 분석할 때 api.anthropic.com 으로만 전송됩니다.</p>
+      <input type="password" id="scanKeyInput" class="scan-key-input" placeholder="sk-ant-..." autocomplete="off">
+      <div class="dialog-actions">
+        <button value="cancel" class="primary-btn ghost" type="submit">취소</button>
+        <button value="save" class="primary-btn" type="submit">저장</button>
+      </div>
+    </form>
+  </dialog>
 </div>
 
 <!-- ── PRACTICE (Guitar Neck) ────────────────────────── -->
@@ -257,7 +251,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=20"></script>
+<script src="app.js?v=21"></script>
 <script>
 if ('serviceWorker' in navigator) {
   let reloading = false;

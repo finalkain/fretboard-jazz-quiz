@@ -52,7 +52,7 @@ body {
 }
 body[data-view="home"]     #view-home     { display: flex; }
 body[data-view="quiz"]     #view-quiz     { display: flex; }
-body[data-view="scales"]   #view-scales   { display: flex; }
+body[data-view="scan"]     #view-scan     { display: flex; }
 body[data-view="practice"] #view-practice { display: flex; }
 
 .topbar-title {
@@ -1035,4 +1035,83 @@ body.show-notes .cell.fret-0::after { display: none; }
 }
 .fn-pick-btn:hover { background: rgba(88,166,255,0.08); }
 .fn-pick-btn.on { background: var(--accent-dim); border-color: var(--accent); color: white; }
+
+/* ── Score Scan view ──────────────────────────────── */
+.scan-main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+}
+.scan-preview-wrap {
+  border: 1px dashed var(--fret-line);
+  border-radius: 12px;
+  background: var(--bg-elev);
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.scan-preview { max-width: 100%; max-height: 46vh; border-radius: 10px; display: block; }
+/* explicit display rules override the [hidden] attribute — restore it */
+.scan-preview[hidden], .scan-placeholder[hidden] { display: none; }
+.scan-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--fg-dim, #8b949e);
+  font-size: 14px;
+  padding: 28px 16px;
+  text-align: center;
+}
+.scan-ph-icon { font-size: 40px; }
+.scan-actions { display: flex; gap: 10px; }
+.scan-actions .primary-btn { flex: 1; }
+.scan-status { font-size: 13px; color: var(--fg-dim, #8b949e); min-height: 18px; text-align: center; }
+.scan-status.error { color: #f08a8a; }
+.scan-result { display: flex; flex-direction: column; gap: 12px; }
+.scan-chord-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.scan-chord {
+  background: var(--bg-elev);
+  border: 1px solid var(--fret-line);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.scan-chord-sym { font-size: 19px; font-weight: 800; color: var(--accent); }
+.scan-chord-notes { font-size: 12px; color: var(--fg-dim, #8b949e); }
+.scan-summary {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg-elev);
+  border: 1px solid var(--fret-line);
+  border-radius: 10px;
+  padding: 12px;
+}
+.scan-empty { font-size: 14px; color: var(--fg-dim, #8b949e); text-align: center; padding: 20px; }
+.scan-key-note { font-size: 12px; color: var(--fg-dim, #8b949e); line-height: 1.5; margin: 0 0 12px; }
+.scan-key-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--fret-line);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 14px;
+}
 

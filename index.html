@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=22">
+<link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body data-view="home">
 
@@ -106,6 +106,8 @@
       <button id="scanShootBtn" class="primary-btn">📷 촬영 / 선택</button>
       <button id="scanRunBtn" class="primary-btn" disabled>🔍 코드 분석</button>
     </div>
+
+    <button id="scanKeyBtn2" type="button" class="scan-keylink">🔑 API 키 입력 / 수정</button>
 
     <div id="scanStatus" class="scan-status"></div>
     <div id="scanResult" class="scan-result"></div>
@@ -255,7 +257,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=22"></script>
+<script src="app.js?v=23"></script>
 <script>
 if ('serviceWorker' in navigator) {
   let reloading = false;

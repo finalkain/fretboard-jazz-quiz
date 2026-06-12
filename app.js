@@ -1170,7 +1170,9 @@ const SCAN_KEY_LS = 'anthropicApiKey';
 let scanInited = false;
 let scanImage  = null;   // { mediaType, data(base64) }
 
-const getScanKey = () => (localStorage.getItem(SCAN_KEY_LS) || '').trim();
+// 따옴표/공백/줄바꿈이 섞여 들어와도 정리 (Anthropic 키엔 공백이 없음)
+const cleanKey  = (s) => (s || '').replace(/^[\s'"`]+|[\s'"`]+$/g, '').replace(/\s+/g, '');
+const getScanKey = () => cleanKey(localStorage.getItem(SCAN_KEY_LS) || '');
 
 function setScanStatus(msg, isErr) {
   const el = document.getElementById('scanStatus');
@@ -1270,16 +1272,22 @@ function initScan() {
 
   runBtn.addEventListener('click', runScan);
 
-  keyBtn.addEventListener('click', () => {
+  const openKeyDialog = () => {
     keyInput.value = getScanKey();
     if (keyDialog.showModal) keyDialog.showModal(); else keyDialog.setAttribute('open', '');
     keyInput.focus();
-  });
+  };
+  keyBtn.addEventListener('click', openKeyDialog);
+  const keyBtn2 = document.getElementById('scanKeyBtn2');
+  if (keyBtn2) keyBtn2.addEventListener('click', openKeyDialog);
+
   keyDialog.addEventListener('close', () => {
-    if (keyDialog.returnValue === 'save') {
-      localStorage.setItem(SCAN_KEY_LS, keyInput.value.trim());
-      setScanStatus(getScanKey() ? 'API 키가 저장되었습니다.' : 'API 키가 비워졌습니다.');
-    }
+    if (keyDialog.returnValue !== 'save') return;
+    const k = cleanKey(keyInput.value);
+    localStorage.setItem(SCAN_KEY_LS, k);
+    if (!k) setScanStatus('API 키가 비워졌습니다.');
+    else if (!k.startsWith('sk-ant')) setScanStatus('저장됨 — 다만 키가 sk-ant- 로 시작하지 않아요. 다시 확인해 주세요.', true);
+    else setScanStatus('API 키가 저장되었습니다.');
   });
 }
 

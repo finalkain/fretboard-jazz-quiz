@@ -1072,6 +1072,17 @@ body.show-notes .cell.fret-0::after { display: none; }
 .scan-ph-icon { font-size: 40px; }
 .scan-actions { display: flex; gap: 10px; }
 .scan-actions .primary-btn { flex: 1; }
+.scan-keylink {
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-family: inherit;
+  padding: 2px 8px;
+  cursor: pointer;
+  text-decoration: underline;
+}
 .scan-status { font-size: 13px; color: var(--fg-dim, #8b949e); min-height: 18px; text-align: center; }
 .scan-status.error { color: #f08a8a; }
 .scan-result { display: flex; flex-direction: column; gap: 12px; }

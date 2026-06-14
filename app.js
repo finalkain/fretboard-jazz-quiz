@@ -1597,6 +1597,10 @@ function initRealBook() {
 function renderSongList() {
   const el = document.getElementById('rbList');
   el.innerHTML = '';
+  const legend = document.createElement('div');
+  legend.className = 'rb-legend';
+  legend.innerHTML = '<span class="rb-star">★</span> 초보자에게 적당한 곡';
+  el.appendChild(legend);
   const cache = getRbCache();
   REALBOOK_SONGS.forEach(song => {
     const btn = document.createElement('button');
@@ -1604,7 +1608,13 @@ function renderSongList() {
     btn.className = 'rb-song-item' + (song.s ? ' star' : '');
     const title = document.createElement('span');
     title.className = 'rb-song-title';
-    title.textContent = (song.s ? '★ ' : '') + song.t;
+    if (song.s) {
+      const star = document.createElement('span');
+      star.className = 'rb-star';
+      star.textContent = '★ ';
+      title.appendChild(star);
+    }
+    title.appendChild(document.createTextNode(song.t));
     btn.appendChild(title);
     const tags = document.createElement('span');
     tags.className = 'rb-tags';

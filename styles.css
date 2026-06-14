@@ -1205,6 +1205,8 @@ body.show-notes .cell.fret-0::after { display: none; }
 }
 .rb-list { display: flex; flex-direction: column; gap: 8px; }
 .rb-list[hidden], .rb-song[hidden], #rbBackList[hidden] { display: none; }
+.rb-legend { font-size: 12px; color: var(--fg-dim, #8b949e); margin-bottom: 2px; }
+.rb-star { color: var(--warn, #d29922); font-weight: 800; }
 .rb-song-item {
   display: flex;
   align-items: center;

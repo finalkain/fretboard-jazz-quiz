@@ -1576,6 +1576,65 @@ const rbPrompt = (title) =>
 - 코드 심볼은 표준 표기로(예: Cmaj7, Am7, D7, G7, Bm7b5, F#m7b5).
 - 각 코드마다 즉흥연주에 쓸 수 있는 대표 스케일을 1~3개 scales에 한국어로 적으세요(예: "D 도리안", "G 믹솔리디안", "C 메이저", "A 얼터드", "F 리디안").`;
 
+// Real Book 5th ed.에서 직접 옮긴 코드 진행 (API 없이 사용). m = 마디별 코드 배열.
+const REALBOOK_DATA = {
+  'All Of Me': { key: 'C Major', m: [
+    ['Cmaj7'],['Cmaj7'],['E7'],['E7'],['A7'],['A7'],['Dm7'],['Dm7'],
+    ['E7'],['E7'],['Am7'],['Am7'],['D7'],['D7'],['Dm7'],['G7'],
+    ['Cmaj7'],['Cmaj7'],['E7'],['E7'],['A7'],['A7'],['Dm7'],['Dm7'],
+    ['Fmaj7'],['Fm6'],['Cmaj7','Em7'],['A7'],['Dm7'],['G7'],['C6'],['Ebdim7','Dm7','G7'] ] },
+  'Autumn Leaves': { key: 'G Major / E minor', m: [
+    ['Am7'],['D7'],['Gmaj7'],['Cmaj7'],['F#m7b5'],['B7'],['Em7'],['Em7'],
+    ['Am7'],['D7'],['Gmaj7'],['Cmaj7'],['F#m7b5'],['B7'],['Em7'],['Em7'],
+    ['F#m7b5'],['B7'],['Em7'],['Em7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],
+    ['F#m7b5'],['B7b9'],['Em7','Eb7'],['Dm7','Db7'],['Cmaj7'],['B7b9'],['Em7'],['Em7'] ] },
+  'Beautiful Love': { key: 'D minor', m: [
+    ['Em7b5'],['A7b9'],['Dm7'],['Dm7'],['Gm7'],['C7'],['Fmaj7'],['Em7b5','A7'],
+    ['Dm7'],['Gm7'],['Bb7'],['Em7b5','A7'],['Dm7'],['Gm7'],['Em7b5'],['A7b9'],
+    ['Em7b5'],['A7b9'],['Dm7'],['Dm7'],['Gm7'],['C7'],['Fmaj7'],['Em7b5','A7'],
+    ['Dm7'],['Gm7'],['Bb7'],['Em7b5','A7'],['Dm7'],['Bb7','A7'],['Dm7'],['Dm7'] ] },
+  'Oleo': { key: 'Bb Major', m: [
+    ['Bbmaj7','G7'],['Cm7','F7'],['Bbmaj7','G7'],['Cm7','F7'],['Fm7','Bb7'],['Ebmaj7','Ebm6'],['Bbmaj7','G7'],['Cm7','F7'],
+    ['Bbmaj7','G7'],['Cm7','F7'],['Bbmaj7','G7'],['Cm7','F7'],['Fm7','Bb7'],['Ebmaj7','Ebm6'],['Bbmaj7','G7'],['Bbmaj7'],
+    ['D7'],['D7'],['G7'],['G7'],['C7'],['C7'],['F7'],['F7'],
+    ['Bbmaj7','G7'],['Cm7','F7'],['Bbmaj7','G7'],['Cm7','F7'],['Fm7','Bb7'],['Ebmaj7','Ebm6'],['Bbmaj7','G7'],['Bbmaj7'] ] },
+  'Satin Doll': { key: 'C Major', m: [
+    ['Dm7','G7'],['Dm7','G7'],['Em7','A7'],['Em7','A7'],['Am7','D7'],['Abm7','Db7'],['C6'],['Em7b5','A7b9'],
+    ['Dm7','G7'],['Dm7','G7'],['Em7','A7'],['Em7','A7'],['Am7','D7'],['Abm7','Db7'],['C6'],['C6'],
+    ['Gm7','C7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Am7','D7'],['Am7','D7'],['Dm7','G7'],['Em7','A7'],
+    ['Dm7','G7'],['Dm7','G7'],['Em7','A7'],['Em7','A7'],['Am7','D7'],['Abm7','Db7'],['C6'],['C6'] ] },
+  "Take The 'A' Train": { key: 'C Major', m: [
+    ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C6'],
+    ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C7'],
+    ['Fmaj7'],['Fmaj7'],['Fmaj7'],['Fmaj7'],['D7'],['D7'],['Dm7'],['G7'],
+    ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C6'] ] },
+};
+
+// 코드 심볼 → 추천 스케일(한국어) 자동 매핑
+function chordToScales(sym) {
+  const mm = /^([A-G][#b]?)(.*)$/.exec(sym || '');
+  if (!mm) return [];
+  const r = mm[1], q = mm[2];
+  const S = (n) => r + ' ' + n;
+  if (/maj/.test(q))            return [S('아이오니안'), S('리디안')];
+  if (/dim|°/.test(q))          return [S('디미니쉬드')];
+  if (/m7b5|ø/.test(q))         return [S('로크리안')];
+  if (/m/.test(q))              return [S('도리안'), S('에올리안')];
+  if (/alt|7#9|7b9|7#5/.test(q))return [S('얼터드')];
+  if (/7b5/.test(q))            return [S('리디안 ♭7'), S('홀톤')];
+  if (/sus/.test(q))            return [S('믹솔리디안')];
+  if (/7|9|13/.test(q))         return [S('믹솔리디안')];
+  return [S('아이오니안'), S('리디안')];   // C, C6, Cmaj 등
+}
+
+function buildFixedSong(title, fixed) {
+  return {
+    title,
+    key: fixed.key,
+    measures: fixed.m.map(syms => ({ chords: syms.map(s => ({ symbol: s, scales: chordToScales(s) })) })),
+  };
+}
+
 let rbInited = false;
 const RB_CACHE = 'realbookCache';
 const getRbCache = () => { try { return JSON.parse(localStorage.getItem(RB_CACHE) || '{}'); } catch (_) { return {}; } };
@@ -1619,7 +1678,8 @@ function renderSongList() {
     const tags = document.createElement('span');
     tags.className = 'rb-tags';
     if (song.b) tags.innerHTML += '<span class="rb-tag">블루스</span>';
-    if (cache[song.t]) tags.innerHTML += '<span class="rb-tag saved">저장됨</span>';
+    if (REALBOOK_DATA[song.t]) tags.innerHTML += '<span class="rb-tag book">교본</span>';
+    else if (cache[song.t]) tags.innerHTML += '<span class="rb-tag saved">저장됨</span>';
     btn.appendChild(tags);
     btn.addEventListener('click', () => openSong(song.t));
     el.appendChild(btn);
@@ -1640,6 +1700,12 @@ async function openSong(title) {
   document.getElementById('rbSongHead').textContent = title;
   document.getElementById('rbSheet').innerHTML = '';
   document.getElementById('rbScalePanel').innerHTML = '';
+
+  if (REALBOOK_DATA[title]) {   // 교본에서 옮긴 정확한 코드 진행 (API 불필요)
+    renderSong(buildFixedSong(title, REALBOOK_DATA[title]));
+    rbStatus('Real Book 수록 코드 진행');
+    return;
+  }
 
   const cache = getRbCache();
   if (cache[title]) { renderSong(cache[title]); rbStatus(''); return; }

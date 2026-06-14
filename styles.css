@@ -1235,6 +1235,7 @@ body.show-notes .cell.fret-0::after { display: none; }
   white-space: nowrap;
 }
 .rb-tag.saved { color: var(--accent); border-color: var(--accent); }
+.rb-tag.book { color: var(--good, #3fb950); border-color: var(--good, #3fb950); }
 
 .rb-song { display: flex; flex-direction: column; gap: 12px; }
 .rb-song-head { font-size: 18px; font-weight: 800; color: var(--accent); }

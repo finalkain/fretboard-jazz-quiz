@@ -2,3 +2,6 @@
 .claude/
 *.log
 node_modules/
+
+# 대용량 원본 자료 (로컬 전용)
+*.pdf

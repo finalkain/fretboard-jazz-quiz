@@ -1619,6 +1619,56 @@ const REALBOOK_DATA = {
     ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C7'],
     ['Fmaj7'],['Fmaj7'],['Fmaj7'],['Fmaj7'],['D7'],['D7'],['Dm7'],['G7'],
     ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C6'] ] },
+  'The Days Of Wine And Roses': { key: 'F Major', m: [
+    ['Fmaj7'],['Eb7'],['Dm7b5'],['D7'],['Gm7'],['Gm7'],['Bbm7'],['Eb7'],
+    ['Am7'],['Dm7'],['Gm7'],['C7'],['Em7b5','A7b9'],['Dm7','G7'],['Gm7'],['C7'],
+    ['Fmaj7'],['Eb7'],['Dm7b5'],['D7'],['Gm7'],['Gm7'],['Bbm7'],['Eb7'],
+    ['Am7'],['Dm7'],['Bm7b5'],['Bb7'],['Am7','Dm7'],['Gm7','C7'],['F6'],['Gm7','C7'] ] },
+  'I Love You': { key: 'F Major', m: [
+    ['Gm7b5'],['C7b9'],['Fmaj7'],['Fmaj7'],['Gm7'],['C7'],['Fmaj7'],['Fmaj7'],
+    ['Gm7b5'],['C7b9'],['Fmaj7'],['Bm7','E7'],['Amaj7'],['Bm7','E7'],['Amaj7'],['Amaj7'],
+    ['Gm7'],['C7'],['Fmaj7'],['Fmaj7'],['Am7b5'],['D7b9'],['Gm7'],['C7'],
+    ['Gm7b5'],['C7b9'],['Fmaj7'],['Am7b5','D7'],['Gm7'],['Gm7','C7'],['F6'],['F6'] ] },
+  "I'll Remember April": { key: 'G Major', m: [
+    ['Gmaj7'],['G6'],['Gmaj7'],['G6'],['Gm7'],['Gm6'],['Gm7'],['Gm6'],
+    ['Am7b5'],['D7'],['Bm7b5'],['E7'],['Am7'],['D7'],['G6'],['G#dim7'],
+    ['Cm7'],['F7'],['Bbmaj7'],['Gm7'],['Cm7'],['F7'],['Bbmaj7'],['Bb6'],
+    ['Am7'],['D7'],['Gmaj7'],['G6'],['F#m7'],['B7'],['Em7'],['Am7','D7'],
+    ['Gmaj7'],['G6'],['Gmaj7'],['G6'],['Gm7'],['Gm6'],['Gm7'],['Gm6'],
+    ['Am7b5'],['D7'],['Bm7b5'],['E7'],['Am7'],['D7'],['G6'],['G6'] ] },
+  'Just Friends': { key: 'G Major', m: [
+    ['G7'],['Cmaj7'],['Cmaj7'],['Cm7','F7'],['Gmaj7'],['Gmaj7'],['Bbm7'],['Eb7'],
+    ['Am7'],['D7'],['Bm7'],['E7'],['A7'],['A7'],['Am7'],['D7','Db7'],
+    ['Cmaj7'],['Cmaj7'],['Cm7'],['F7'],['Gmaj7'],['Gmaj7'],['Bbm7'],['Eb7'],
+    ['Am7'],['D7'],['Bm7'],['E7'],['A7'],['Am7','D7'],['G6'],['Dm7','G7'] ] },
+  'Lullaby Of Birdland': { key: 'F minor', m: [
+    ['Fm7'],['G7','C7'],['Fm7'],['Bbm7','Eb7'],['Abmaj7'],['Fm7','Bbm7'],['Eb7'],['Abmaj7'],
+    ['Fm7'],['G7','C7'],['Fm7'],['Bbm7','Eb7'],['Abmaj7'],['Fm7','Bbm7'],['Eb7','Db7'],['C7'],
+    ['Abmaj7'],['F7'],['Bbm7'],['Bbm7','Eb7'],['Abmaj7'],['F7'],['Bbm7'],['Bbm7','Eb7'],
+    ['Fm7'],['G7','C7'],['Fm7'],['Bbm7','Eb7'],['Abmaj7'],['Fm7','Bbm7'],['Eb7'],['Abmaj7'] ] },
+  'Mr. P.C.': { key: 'C minor', m: [
+    ['Cm7'],['Cm7'],['Cm7'],['Cm7'],['Fm7'],['Fm7'],['Cm7'],['Cm7'],
+    ['Dm7b5'],['G7'],['Cm7'],['G7'] ] },
+  'Night And Day': { key: 'C Major', m: [
+    ['Dm7b5'],['G7'],['Cmaj7'],['Cmaj7'],['Dm7b5'],['G7'],['Cmaj7'],['Cmaj7'],
+    ['F#m7b5'],['Fm7'],['Em7'],['Ebdim7'],['Dm7'],['G7'],['Cmaj7'],['Cmaj7'],
+    ['Ebmaj7'],['Ebmaj7'],['Cmaj7'],['Cmaj7'],['Ebmaj7'],['Ebmaj7'],['Cmaj7'],['Cmaj7'],
+    ['F#m7b5'],['Fm7'],['Em7'],['Ebdim7'],['Dm7'],['G7','Dm7'],['C6'],['Dm7','G7'] ] },
+  'Ornithology': { key: 'G Major', m: [
+    ['Gmaj7'],['Gmaj7'],['Gm7','C7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Fm7'],['Bb7'],
+    ['Ebmaj7'],['Am7b5','D7'],['Gmaj7'],['Gmaj7'],['Bm7'],['E7'],['Am7'],['D7'],
+    ['Gmaj7'],['Gmaj7'],['Gm7','C7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Fm7'],['Bb7'],
+    ['Ebmaj7'],['Am7b5','D7'],['Gmaj7'],['A7'],['Am7'],['D7'],['Gmaj7'],['Am7','D7'] ] },
+  'There Is No Greater Love': { key: 'Bb Major', m: [
+    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['C7'],['C7'],['F7'],['F7'],
+    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['C7'],['Cm7','F7'],['Bb6'],['Bb6'],
+    ['Am7b5','D7'],['Gm7'],['Am7b5','D7'],['Gm7'],['Am7b5','D7'],['Gm7'],['C7'],['F7'],
+    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['C7'],['Cm7','F7'],['Bb6'],['F7'] ] },
+  'There Will Never Be Another You': { key: 'Eb Major', m: [
+    ['Ebmaj7'],['Ebmaj7'],['Dm7b5'],['G7b9'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],
+    ['Abmaj7'],['Fm7b5','Bb7'],['Ebmaj7'],['Cm7'],['F7'],['Cm7','F7'],['Fm7'],['Bb7'],
+    ['Ebmaj7'],['Ebmaj7'],['Dm7b5'],['G7b9'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],
+    ['Abmaj7'],['Fm7b5','Bb7'],['Ebmaj7'],['Gm7','C7'],['Fm7'],['Bb7'],['Eb6'],['Bb7'] ] },
 };
 
 // 코드 심볼 → 추천 스케일(한국어) 자동 매핑
@@ -1804,6 +1854,106 @@ const REALBOOK_DOC = {
       'D7b5(=D7#11)은 C장조의 II7(리디안 도미넌트)로 특유의 색을 주지만, 이어서 Dm7–G7 의 ii–V 로 연결됩니다.',
       'Dm7 → G7 → C 는 C장조의 ii–V–I 종지입니다.',
       '브릿지는 F(IV)로 잠깐 갔다가 D7–Dm7–G7 로 다시 C 로 돌아옵니다 → 중심키 C 메이저.',
+    ],
+  },
+  'The Days Of Wine And Roses': {
+    center: 'F 메이저',
+    summary: 'Fmaj7 로 시작하고 Gm7–C7–F 의 ii–V–I 로 닫히는 F장조 곡.',
+    steps: [
+      '첫 코드가 Fmaj7, 끝이 F6 → 중심 후보는 F.',
+      '뒤쪽 Gm7 → C7 → F6 는 F장조의 ii–V–I 종지입니다.',
+      'Eb7·Bbm7 은 F장조 밖의 차용 코드(백도어/모달 인터체인지)로 색만 주고 곧 다이아토닉으로 돌아옵니다.',
+      'Am7·Dm7·Gm7·C7 같은 다이아토닉 진행이 뼈대 → 중심키 F 메이저.',
+    ],
+  },
+  'I Love You': {
+    center: 'F 메이저',
+    summary: 'Gm7b5–C7b9–Fmaj7 의 ii–V 로 F 로 도는 곡(중간에 A장조 색).',
+    steps: [
+      'Gm7b5 → C7b9 → Fmaj7 은 F로 향하는 ii–V–I 입니다.',
+      'Gm7–C7–Fmaj7 의 보통 ii–V–I 도 반복되어 F 를 굳힙니다.',
+      'B7–E7–Amaj7 부분은 잠깐 A장조로 가는 임시 전조입니다.',
+      '끝이 F6 → 중심키 F 메이저.',
+    ],
+  },
+  "I'll Remember April": {
+    center: 'G 메이저',
+    summary: 'Gmaj7(장)과 Gm7(단)을 오가다 G로 도는 곡, 중간에 Bb장조로 잠깐 전조.',
+    steps: [
+      '첫 8마디가 Gmaj7/G6 ↔ Gm7/Gm6 — 같은 으뜸음 G의 장·단을 오갑니다.',
+      'Am7b5–D7, Am7–D7 는 G로 향하는 ii–V 입니다.',
+      'Cm7–F7–Bbmaj7 부분은 Bb장조로 잠깐 전조(G단조의 상대조).',
+      'F#m7–B7–Em7 뒤 Am7–D7 로 다시 G 로 돌아오고 G 로 끝 → 중심키 G 메이저.',
+    ],
+  },
+  'Just Friends': {
+    center: 'G 메이저',
+    summary: 'Cmaj7 근처에서 시작하지만 Am7–D7–G 로 도는 G장조 곡.',
+    steps: [
+      '시작은 G7–Cmaj7(C쪽 색)이지만 Cm7–F7 로 G장조 쪽으로 끌어옵니다.',
+      'Am7 → D7 → G 가 곡 곳곳에서 G장조의 ii–V–I 로 해결됩니다.',
+      'Bbm7–Eb7 등은 잠깐의 색이고, 끝이 G6 / Dm7–G7 로 G 를 가리킵니다.',
+      '조표(샵 1개)와 종지 → 중심키 G 메이저.',
+    ],
+  },
+  'Lullaby Of Birdland': {
+    center: 'F 마이너',
+    summary: 'Fm 으로 시작·끝나고 Bbm7–Eb7–Abmaj7(상대조 Ab)를 오가는 F단조 곡.',
+    steps: [
+      'Fm – G7 C7 – Fm 로 F 가 으뜸음임을 보여줍니다(C7 은 Fm 의 도미넌트 V).',
+      'Bbm7 → Eb7 → Abmaj7 은 Ab장조(=F단조의 상대조)의 ii–V–I 로, 두 조를 오갑니다.',
+      '브릿지의 F7 → Bbm7 도 도미넌트 움직임.',
+      '곡이 Fm 로 끝남 → 중심키 F 마이너(상대조 Ab장조).',
+    ],
+  },
+  'Mr. P.C.': {
+    center: 'C 마이너',
+    summary: 'Cm7 중심의 12마디 마이너 블루스.',
+    steps: [
+      '1~8마디가 Cm7 ↔ Fm7(i ↔ iv) — C단조 블루스의 골격.',
+      '9~10마디 Dm7b5 → G7 은 C단조의 ii–V(단조의 도미넌트 G7).',
+      '11~12마디 Cm7 → G7 로 i 로 해결하고 다시 돕니다.',
+      '전체가 Cm7 중심의 마이너 블루스 → 중심키 C 마이너.',
+    ],
+  },
+  'Night And Day': {
+    center: 'C 메이저',
+    summary: 'Dm7b5–G7–Cmaj7 로 도는 C장조 곡(중간에 Eb장조 색).',
+    steps: [
+      'Dm7b5 → G7 → Cmaj7 은 C로 향하는 ii–V–I 입니다.',
+      'F#m7b5–Fm7–Em7–Ebdim7 의 반음 하행은 다시 Dm7–G7–C 로 이어집니다.',
+      'Ebmaj7 부분은 ♭III(Eb장조)로 잠깐 색을 바꾸지만 곧 C 로 복귀.',
+      '끝이 C6 → 중심키 C 메이저.',
+    ],
+  },
+  'Ornithology': {
+    center: 'G 메이저',
+    summary: "‘How High the Moon’ 코드를 빌린 곡으로, Gmaj7 로 도는 G장조.",
+    steps: [
+      '첫 코드 Gmaj7 → 중심 후보 G.',
+      'Gm7–C7(→F), Fm7–Bb7(→Eb) 처럼 ii–V 가 연쇄로 내려가며 잠깐씩 다른 조를 스칩니다.',
+      'Ebmaj7 → Am7b5–D7 → Gmaj7 로 다시 G장조로 해결됩니다.',
+      'Bm7–E7–Am7–D7 도 G로 향하는 진행 → 중심키 G 메이저.',
+    ],
+  },
+  'There Is No Greater Love': {
+    center: 'Bb 메이저',
+    summary: 'Bbmaj7 로 시작하고 Cm7–F7–Bb 로 닫히는 Bb장조 곡.',
+    steps: [
+      '첫 코드 Bbmaj7 → 중심 후보 Bb.',
+      'Eb7–Ab7–G7 은 색을 주는 도미넌트들이지만 Cm7 → F7 → Bb 의 ii–V–I 로 풀립니다.',
+      'Am7b5–D7–Gm 부분은 잠깐 G단조로 가는 ii–V–i.',
+      '끝이 Bb6 → 중심키 Bb 메이저.',
+    ],
+  },
+  'There Will Never Be Another You': {
+    center: 'Eb 메이저',
+    summary: 'Ebmaj7 로 시작·끝나고 ii–V 로 도는 Eb장조 곡.',
+    steps: [
+      '첫 코드 Ebmaj7, 끝 Eb6 → 중심 Eb.',
+      'Dm7b5 → G7b9 은 잠깐 Cm 쪽을 스치고 Cm7–Bbm7–Eb7 로 다시 Eb 로 향합니다.',
+      'Abmaj7(IV) – Fm7b5–Bb7 – Ebmaj7 로 자연스럽게 Eb 로 해결.',
+      'Fm7 → Bb7 → Eb 의 ii–V–I 종지 → 중심키 Eb 메이저.',
     ],
   },
 };

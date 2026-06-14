@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=31">
+<link rel="stylesheet" href="styles.css?v=32">
 </head>
 <body data-view="home">
 
@@ -158,6 +158,11 @@
     <div id="rbSong" class="rb-song" hidden>
       <div id="rbSongHead" class="rb-song-head"></div>
       <button id="rbKeyBtn" type="button" class="rb-key-btn">🎯 이 곡의 중심키 찾는 법</button>
+      <div class="rb-play">
+        <button id="rbPlayBtn" type="button" class="rb-play-btn">▶ 재생</button>
+        <span class="rb-bpm-wrap">BPM <input id="rbBpm" type="number" min="40" max="320" value="120" inputmode="numeric" class="rb-bpm"></span>
+        <button id="rbMuteBtn" type="button" class="rb-mute" aria-pressed="false" aria-label="음 끄기/켜기">🔊</button>
+      </div>
       <div id="rbStatus" class="rb-status"></div>
       <div id="rbSheet" class="rb-sheet"></div>
       <div id="rbScalePanel" class="rb-scale-panel"></div>
@@ -300,7 +305,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=31"></script>
+<script src="app.js?v=32"></script>
 <script>
 if ('serviceWorker' in navigator) {
   let reloading = false;

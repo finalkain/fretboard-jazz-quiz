@@ -1688,10 +1688,20 @@ function chordToScales(sym) {
   return [S('아이오니안'), S('리디안')];   // C, C6, Cmaj 등
 }
 
+// 곡별 대표 BPM(연주마다 다르니 기준값) — 화면에서 수정 가능
+const REALBOOK_BPM = {
+  'All Of Me': 140, 'Autumn Leaves': 130, 'Beautiful Love': 130, 'Oleo': 220,
+  'Satin Doll': 120, "Take The 'A' Train": 160, 'The Days Of Wine And Roses': 120,
+  'I Love You': 140, "I'll Remember April": 160, 'Just Friends': 150,
+  'Lullaby Of Birdland': 150, 'Mr. P.C.': 180, 'Night And Day': 130,
+  'Ornithology': 200, 'There Is No Greater Love': 140, 'There Will Never Be Another You': 160,
+};
+
 function buildFixedSong(title, fixed) {
   return {
     title,
     key: fixed.key,
+    bpm: REALBOOK_BPM[title] || 120,
     measures: fixed.m.map(syms => ({ chords: syms.map(s => ({ symbol: s, scales: chordToScales(s) })) })),
   };
 }
@@ -1715,8 +1725,8 @@ const SCALE_INTERVALS = {
 const NOTE_TO_PC = { C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,'E#':5,Fb:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11,Cb:11 };
 
 // 스케일 이름("E 믹솔리디안") → 지판 다이어그램 DOM. shape = ALL|C|A|G|E|D
-function renderScaleDiagram(scaleName, shape) {
-  shape = shape || 'ALL';
+const CAGED_FORMS = ['C','A','G','E','D'];
+function renderScaleDiagram(scaleName) {
   const wrap = document.createElement('div');
   wrap.className = 'rb-fd';
   const mm = /^([A-G][#b]?)\s+(.+)$/.exec(scaleName || '');
@@ -1728,23 +1738,29 @@ function renderScaleDiagram(scaleName, shape) {
   }
   const pcs = new Set(ivs.map(i => (rootPc + i) % 12));
 
-  // CAGED 폼 선택 (포지션별 손 위치)
-  const forms = document.createElement('div');
-  forms.className = 'rb-fd-forms';
-  [['ALL','전체'],['C','C형'],['A','A형'],['G','G형'],['E','E형'],['D','D형']].forEach(([sh, label]) => {
-    const fb = document.createElement('button');
-    fb.type = 'button';
-    fb.className = 'rb-fd-form' + (sh === shape ? ' on' : '');
-    fb.textContent = label;
-    fb.addEventListener('click', () => {
-      const nw = renderScaleDiagram(scaleName, sh);
-      if (wrap.parentNode) wrap.parentNode.replaceChild(nw, wrap);
-    });
-    forms.appendChild(fb);
+  // CAGED 5폼을 각각 연한 색으로 동시에 표시 (색=폼 고정 → 마디 넘어가도 위치 파악 쉬움)
+  const legend = document.createElement('div');
+  legend.className = 'rb-fd-legend';
+  CAGED_FORMS.forEach(sh => {
+    const l = document.createElement('span');
+    l.className = 'rb-fd-leg';
+    l.innerHTML = `<span class="rb-fd-swatch form-${sh}"></span>${sh}형`;
+    legend.appendChild(l);
   });
-  wrap.appendChild(forms);
+  wrap.appendChild(legend);
 
-  const box = (shape !== 'ALL') ? computeBox(rootPc, shape) : null;   // {start,end} 프렛 범위
+  const boxes = CAGED_FORMS.map(sh => { const b = computeBox(rootPc, sh); return { sh, start: b.start, end: b.end }; });
+  const formForFret = (f) => {   // 그 프렛이 가장 가까운 CAGED 폼
+    let best = null, bd = Infinity;
+    boxes.forEach(bx => {
+      if (f >= bx.start && f <= bx.end) {
+        const d = Math.abs((bx.start + bx.end) / 2 - f);
+        if (d < bd) { bd = d; best = bx.sh; }
+      }
+    });
+    return best;
+  };
+
   const FR = 12;
   const order = [5,4,3,2,1,0];   // 위=1번줄(고음) … 아래=6번줄(저음)
   const cols = `20px repeat(${FR + 1}, 1fr)`;
@@ -1758,14 +1774,14 @@ function renderScaleDiagram(scaleName, shape) {
     lbl.textContent = 6 - s;
     grid.appendChild(lbl);
     for (let f = 0; f <= FR; f++) {
-      const inBox = box ? (f >= box.start && f <= box.end) : true;
+      const form = formForFret(f);
       const cell = document.createElement('div');
-      cell.className = 'rb-fd-cell' + (f === 0 ? ' nut' : '') + (box && inBox ? ' in-box' : '');
+      cell.className = 'rb-fd-cell' + (f === 0 ? ' nut' : '') + (form ? ' form-' + form : '');
       const pc = (STRING_OPEN_PC[s] + f) % 12;
       if (pcs.has(pc)) {
         const dot = document.createElement('button');
         dot.type = 'button';
-        dot.className = 'rb-fd-dot' + (pc === rootPc ? ' root' : '') + (box && !inBox ? ' dim' : '');
+        dot.className = 'rb-fd-dot' + (pc === rootPc ? ' root' : '');
         dot.textContent = noteName(pc);
         dot.addEventListener('click', () => playNote(STRING_OPEN_MIDI[s] + f, 0, 0.8, 0.28));
         cell.appendChild(dot);
@@ -1988,6 +2004,63 @@ function analyzeKey() {
   const doc = REALBOOK_DOC[title] || rbCurrentSong.keyDoc;
   renderKeyDoc(title, doc || null, doc ? '' : '이 곡의 중심키 설명은 아직 준비 중이에요.');
 }
+
+// ── BPM 반주 재생 ──────────────────────────────
+let rbPlayTimer = null, rbPlayIdx = 0, rbMuted = false;
+
+function chordIntervals(q) {
+  q = q || '';
+  if (/m7b5|ø/.test(q))   return [0,3,6,10];
+  if (/dim|°/.test(q))    return [0,3,6,9];
+  if (/maj/.test(q))      return [0,4,7,11];
+  if (/m6/.test(q))       return [0,3,7,9];
+  if (/m(?!aj)/.test(q))  return [0,3,7,10];   // m7, m9, m
+  if (/7/.test(q))        return [0,4,7,10];
+  if (/6/.test(q))        return [0,4,7,9];
+  return [0,4,7];                              // 메이저 3화음
+}
+function playChordTones(symbol, when) {
+  const mm = /^([A-G][#b]?)(.*)$/.exec(symbol || '');
+  if (!mm) return;
+  const root = NOTE_TO_PC[mm[1]];
+  if (root == null) return;
+  const base = 48 + root;   // 기타 중저음역
+  chordIntervals(mm[2]).forEach((iv, i) => playNote(base + iv, when + i * 0.02, 1.5, 0.16));
+}
+function rbStop() {
+  if (rbPlayTimer) { clearTimeout(rbPlayTimer); rbPlayTimer = null; }
+  document.querySelectorAll('#rbSheet .rb-measure.playing').forEach(m => m.classList.remove('playing'));
+  const btn = document.getElementById('rbPlayBtn');
+  if (btn) btn.textContent = '▶ 재생';
+}
+function rbTogglePlay() {
+  if (rbPlayTimer) { rbStop(); return; }
+  if (!rbCurrentSong || !(rbCurrentSong.measures || []).length) return;
+  const measures = rbCurrentSong.measures;
+  const bpm = Math.max(40, Math.min(320, +document.getElementById('rbBpm').value || 120));
+  const dur = (60 / bpm) * 4 * 1000;   // 4박/마디 (ms)
+  const cells = document.querySelectorAll('#rbSheet .rb-measure');
+  document.getElementById('rbPlayBtn').textContent = '⏸ 정지';
+  rbPlayIdx = 0;
+  const step = () => {
+    document.querySelectorAll('#rbSheet .rb-measure.playing').forEach(m => m.classList.remove('playing'));
+    if (rbPlayIdx >= measures.length) { rbStop(); return; }
+    const cell = cells[rbPlayIdx];
+    const chords = measures[rbPlayIdx].chords || [];
+    if (cell) {
+      cell.classList.add('playing');
+      cell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (chords[0]) showSongScales(chords[0], cell.querySelector('.rb-chord'));
+    }
+    if (!rbMuted) {
+      const per = dur / 1000 / Math.max(1, chords.length);
+      chords.forEach((ch, i) => playChordTones(ch.symbol, i * per));
+    }
+    rbPlayIdx++;
+    rbPlayTimer = setTimeout(step, dur);
+  };
+  step();
+}
 const rbStatus = (msg, err) => {
   const el = document.getElementById('rbStatus');
   if (!el) return;
@@ -2001,6 +2074,13 @@ function initRealBook() {
   renderSongList();
   document.getElementById('rbBackList').addEventListener('click', showSongList);
   document.getElementById('rbKeyBtn').addEventListener('click', analyzeKey);
+  document.getElementById('rbPlayBtn').addEventListener('click', rbTogglePlay);
+  document.getElementById('rbMuteBtn').addEventListener('click', () => {
+    rbMuted = !rbMuted;
+    const b = document.getElementById('rbMuteBtn');
+    b.textContent = rbMuted ? '🔇' : '🔊';
+    b.setAttribute('aria-pressed', rbMuted);
+  });
 }
 
 function renderSongList() {
@@ -2037,6 +2117,7 @@ function renderSongList() {
 }
 
 function showSongList() {
+  rbStop();
   document.getElementById('rbList').hidden = false;
   document.getElementById('rbSong').hidden = true;
   document.getElementById('rbBackList').hidden = true;
@@ -2044,6 +2125,7 @@ function showSongList() {
 }
 
 async function openSong(title) {
+  rbStop();
   document.getElementById('rbList').hidden = true;
   document.getElementById('rbSong').hidden = false;
   document.getElementById('rbBackList').hidden = false;
@@ -2083,6 +2165,8 @@ function renderSong(data) {
   rbCurrentSong = data || null;
   if (!data) return;
   head.textContent = data.title + (data.key ? '  ·  ' + data.key : '');
+  const bpmInp = document.getElementById('rbBpm');
+  if (bpmInp) bpmInp.value = data.bpm || 120;
   (data.measures || []).forEach((m, i) => {
     const cell = document.createElement('div');
     cell.className = 'rb-measure';

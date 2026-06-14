@@ -1289,15 +1289,19 @@ body.show-notes .cell.fret-0::after { display: none; }
 .rb-scale-tag.on { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
 .rb-fd-wrap { margin-top: 12px; }
 .rb-fd { display: flex; flex-direction: column; gap: 2px; overflow-x: auto; }
-.rb-fd-forms { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.rb-fd-form {
-  background: var(--bg-elev-2); border: 1px solid var(--fret-line); color: var(--fg);
-  border-radius: 8px; padding: 6px 11px; font-size: 12px; font-weight: 600;
-  font-family: inherit; cursor: pointer; white-space: nowrap;
-}
-.rb-fd-form.on { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
-.rb-fd-cell.in-box { background: rgba(88,166,255,0.12); }
-.rb-fd-dot.dim { opacity: 0.16; }
+.rb-fd-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; font-size: 11px; color: var(--fg-dim, #8b949e); }
+.rb-fd-leg { display: flex; align-items: center; gap: 4px; }
+.rb-fd-swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; border: 1px solid var(--fret-line); }
+.rb-fd-cell.form-C { background: rgba(248,81,73,0.16); }
+.rb-fd-cell.form-A { background: rgba(210,153,34,0.16); }
+.rb-fd-cell.form-G { background: rgba(63,185,80,0.16); }
+.rb-fd-cell.form-E { background: rgba(88,166,255,0.16); }
+.rb-fd-cell.form-D { background: rgba(163,113,247,0.16); }
+.rb-fd-swatch.form-C { background: rgba(248,81,73,0.55); }
+.rb-fd-swatch.form-A { background: rgba(210,153,34,0.55); }
+.rb-fd-swatch.form-G { background: rgba(63,185,80,0.55); }
+.rb-fd-swatch.form-E { background: rgba(88,166,255,0.55); }
+.rb-fd-swatch.form-D { background: rgba(163,113,247,0.55); }
 .rb-fd-grid { display: grid; min-width: 320px; }
 .rb-fd-strlbl {
   display: flex; align-items: center; justify-content: center;
@@ -1343,3 +1347,26 @@ body.show-notes .cell.fret-0::after { display: none; }
 .rb-key-steps li { line-height: 1.55; }
 .rb-key-msg { font-size: 14px; color: var(--fg-dim, #8b949e); padding: 8px 0; }
 .rb-key-msg.err { color: #f08a8a; }
+
+/* ── Real Book: BPM 재생 컨트롤 ────────────────────── */
+.rb-play { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rb-play-btn {
+  background: var(--accent-dim); border: 1px solid var(--accent); color: #fff;
+  border-radius: 8px; padding: 8px 16px; font-size: 14px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+}
+.rb-play-btn:active { background: var(--accent); }
+.rb-bpm-wrap { font-size: 13px; color: var(--fg-dim, #8b949e); display: flex; align-items: center; gap: 6px; }
+.rb-bpm {
+  width: 64px; background: var(--bg-elev-2); border: 1px solid var(--fret-line);
+  color: var(--fg); border-radius: 8px; padding: 7px 8px; font-size: 14px; font-family: inherit;
+}
+.rb-mute {
+  background: var(--bg-elev-2); border: 1px solid var(--fret-line);
+  border-radius: 8px; padding: 7px 10px; font-size: 16px; cursor: pointer;
+}
+.rb-measure.playing {
+  border-color: var(--accent);
+  background: rgba(88,166,255,0.16);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}

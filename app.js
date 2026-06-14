@@ -1490,8 +1490,214 @@ function renderScanResult(parsed) {
   }
 }
 
+// ── Claude JSON 호출 헬퍼 (스캔 키 공유) ──────────────────
+async function claudeJSON({ prompt, schema, image }) {
+  const key = getScanKey();
+  if (!key) throw new Error('NO_KEY');
+  const content = [];
+  if (image) content.push({ type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } });
+  content.push({ type: 'text', text: prompt });
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-8',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content }],
+      output_config: { format: { type: 'json_schema', schema } },
+    }),
+  });
+  if (!res.ok) {
+    let detail = 'HTTP ' + res.status;
+    try { const e = await res.json(); detail = e.error?.message || detail; } catch (_) {}
+    throw new Error(detail);
+  }
+  const data = await res.json();
+  const tb = (data.content || []).find(b => b.type === 'text');
+  if (!tb) throw new Error('응답을 해석하지 못했어요.');
+  return JSON.parse(tb.text);
+}
+
+// ── Real Book (스탠다드 코드 진행 + 마디별 스케일) ─────────
+const REALBOOK_SONGS = [
+  { t: 'All Of Me' }, { t: 'Autumn Leaves', s: 1 }, { t: 'Bye Bye Blackbird' }, { t: 'Beautiful Love', s: 1 },
+  { t: "Billie's Bounce", b: 1 }, { t: 'But Not For Me' }, { t: 'Candy' }, { t: 'Day By Day' },
+  { t: 'The Days Of Wine And Roses' }, { t: 'Fly Me To The Moon', s: 1 }, { t: 'I Love You' },
+  { t: "I'll Remember April" }, { t: "I'll Close My Eyes" }, { t: 'It Could Happen To You' },
+  { t: 'Just Friends' }, { t: 'Lullaby Of Birdland' }, { t: 'Moritat', s: 1 }, { t: 'Mr. P.C.', b: 1 },
+  { t: 'Night And Day' }, { t: "Now's The Time", s: 1, b: 1 }, { t: 'Oleo' }, { t: 'Ornithology' },
+  { t: 'Satin Doll' }, { t: 'Softly, As In A Morning Sunrise' }, { t: 'Summertime' }, { t: 'St. Thomas', s: 1 },
+  { t: 'There Is No Greater Love' }, { t: 'There Will Never Be Another You' }, { t: "Take The 'A' Train" },
+  { t: "You'd Be So Nice To Come Home To" },
+];
+
+const RB_SCHEMA = {
+  type: 'object',
+  properties: {
+    title: { type: 'string' },
+    key:   { type: 'string' },
+    measures: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          chords: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                symbol: { type: 'string' },
+                scales: { type: 'array', items: { type: 'string' } },
+              },
+              required: ['symbol', 'scales'],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ['chords'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['title', 'key', 'measures'],
+  additionalProperties: false,
+};
+
+const rbPrompt = (title) =>
+`당신은 재즈 화성 전문가입니다. 재즈 스탠다드 "${title}"의 대표적인 코드 진행을 리드시트(Real Book) 형태로 제시하세요.
+- key에 조성을 적으세요(예: "C Major", "G minor").
+- measures는 곡의 마디 순서대로 담으세요. 각 마디(measure)에는 그 마디에서 연주되는 코드를 chords 배열로 넣으세요(보통 마디당 1개, 때때로 2개).
+- AABA·ABAC 등 곡의 전체 폼을 가능한 한 모두 포함하세요(보통 32마디).
+- 코드 심볼은 표준 표기로(예: Cmaj7, Am7, D7, G7, Bm7b5, F#m7b5).
+- 각 코드마다 즉흥연주에 쓸 수 있는 대표 스케일을 1~3개 scales에 한국어로 적으세요(예: "D 도리안", "G 믹솔리디안", "C 메이저", "A 얼터드", "F 리디안").`;
+
+let rbInited = false;
+const RB_CACHE = 'realbookCache';
+const getRbCache = () => { try { return JSON.parse(localStorage.getItem(RB_CACHE) || '{}'); } catch (_) { return {}; } };
+const setRbCache = (c) => localStorage.setItem(RB_CACHE, JSON.stringify(c));
+const rbStatus = (msg, err) => {
+  const el = document.getElementById('rbStatus');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.classList.toggle('error', !!err);
+};
+
+function initRealBook() {
+  if (rbInited) return;
+  rbInited = true;
+  renderSongList();
+  document.getElementById('rbBackList').addEventListener('click', showSongList);
+}
+
+function renderSongList() {
+  const el = document.getElementById('rbList');
+  el.innerHTML = '';
+  const cache = getRbCache();
+  REALBOOK_SONGS.forEach(song => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rb-song-item' + (song.s ? ' star' : '');
+    const title = document.createElement('span');
+    title.className = 'rb-song-title';
+    title.textContent = (song.s ? '★ ' : '') + song.t;
+    btn.appendChild(title);
+    const tags = document.createElement('span');
+    tags.className = 'rb-tags';
+    if (song.b) tags.innerHTML += '<span class="rb-tag">블루스</span>';
+    if (cache[song.t]) tags.innerHTML += '<span class="rb-tag saved">저장됨</span>';
+    btn.appendChild(tags);
+    btn.addEventListener('click', () => openSong(song.t));
+    el.appendChild(btn);
+  });
+}
+
+function showSongList() {
+  document.getElementById('rbList').hidden = false;
+  document.getElementById('rbSong').hidden = true;
+  document.getElementById('rbBackList').hidden = true;
+  renderSongList();   // 저장됨 표시 갱신
+}
+
+async function openSong(title) {
+  document.getElementById('rbList').hidden = true;
+  document.getElementById('rbSong').hidden = false;
+  document.getElementById('rbBackList').hidden = false;
+  document.getElementById('rbSongHead').textContent = title;
+  document.getElementById('rbSheet').innerHTML = '';
+  document.getElementById('rbScalePanel').innerHTML = '';
+
+  const cache = getRbCache();
+  if (cache[title]) { renderSong(cache[title]); rbStatus(''); return; }
+
+  if (!getScanKey()) {
+    rbStatus('이 곡을 처음 열려면 API 키가 필요해요. 악보 스캔 화면의 🔑에서 입력하면 공유됩니다.', true);
+    return;
+  }
+  rbStatus('코드 진행 불러오는 중… (수 초 걸릴 수 있어요)');
+  try {
+    const data = await claudeJSON({ prompt: rbPrompt(title), schema: RB_SCHEMA });
+    cache[title] = data; setRbCache(cache);
+    renderSong(data); rbStatus('');
+  } catch (e) {
+    rbStatus(e.message === 'NO_KEY' ? 'API 키가 필요합니다.' : '불러오기 실패: ' + e.message, true);
+  }
+}
+
+function renderSong(data) {
+  const head  = document.getElementById('rbSongHead');
+  const sheet = document.getElementById('rbSheet');
+  const panel = document.getElementById('rbScalePanel');
+  sheet.innerHTML = '';
+  panel.innerHTML = '';
+  if (!data) return;
+  head.textContent = data.title + (data.key ? '  ·  ' + data.key : '');
+  (data.measures || []).forEach((m, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'rb-measure';
+    const num = document.createElement('span');
+    num.className = 'rb-measure-num';
+    num.textContent = i + 1;
+    cell.appendChild(num);
+    (m.chords || []).forEach(ch => {
+      const c = document.createElement('button');
+      c.type = 'button';
+      c.className = 'rb-chord';
+      c.textContent = ch.symbol;
+      c.addEventListener('click', () => showSongScales(ch, c));
+      cell.appendChild(c);
+    });
+    sheet.appendChild(cell);
+  });
+  panel.innerHTML = '<div class="rb-hint">코드를 탭하면 그 코드에서 쓸 수 있는 스케일이 표시됩니다.</div>';
+}
+
+function showSongScales(ch, btn) {
+  document.querySelectorAll('#rbSheet .rb-chord.sel').forEach(b => b.classList.remove('sel'));
+  if (btn) btn.classList.add('sel');
+  const panel = document.getElementById('rbScalePanel');
+  panel.innerHTML = '';
+  const h = document.createElement('div');
+  h.className = 'rb-scale-sym';
+  h.textContent = ch.symbol;
+  panel.appendChild(h);
+  const list = document.createElement('div');
+  list.className = 'rb-scale-list';
+  (ch.scales || []).forEach(s => {
+    const tag = document.createElement('span');
+    tag.className = 'rb-scale-tag';
+    tag.textContent = s;
+    list.appendChild(tag);
+  });
+  panel.appendChild(list);
+}
+
 // ── View navigation ───────────────────────────
-const VALID_VIEWS = ['home','quiz','scan','practice'];
+const VALID_VIEWS = ['home','quiz','scan','practice','realbook'];
 function setView(name) {
   if (!VALID_VIEWS.includes(name)) name = 'home';
   const prev = document.body.dataset.view;
@@ -1506,6 +1712,7 @@ function setView(name) {
   }
 
   if (name === 'scan')     initScan();
+  if (name === 'realbook') initRealBook();
   if (name === 'practice') initFretNeck();
   if (name === 'quiz' && !localStorage.getItem(FIRST_RUN_KEY)) {
     setTimeout(() => { openHelp(); localStorage.setItem(FIRST_RUN_KEY, '1'); }, 200);

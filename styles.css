@@ -54,6 +54,7 @@ body[data-view="home"]     #view-home     { display: flex; }
 body[data-view="quiz"]     #view-quiz     { display: flex; }
 body[data-view="scan"]     #view-scan     { display: flex; }
 body[data-view="practice"] #view-practice { display: flex; }
+body[data-view="realbook"] #view-realbook { display: flex; }
 
 .topbar-title {
   font-weight: 700;
@@ -1191,3 +1192,91 @@ body.show-notes .cell.fret-0::after { display: none; }
 }
 .scan-paste-btn { flex-shrink: 0; padding: 9px 12px; font-size: 13px; white-space: nowrap; }
 
+
+/* ── Real Book view ───────────────────────────────── */
+.rb-main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rb-list { display: flex; flex-direction: column; gap: 8px; }
+.rb-list[hidden], .rb-song[hidden], #rbBackList[hidden] { display: none; }
+.rb-song-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg-elev);
+  border: 1px solid var(--fret-line);
+  color: var(--fg);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.rb-song-item.star { border-color: var(--accent); }
+.rb-song-item:active { background: var(--accent-dim); }
+.rb-song-title { font-weight: 600; }
+.rb-tags { display: flex; gap: 6px; flex-shrink: 0; }
+.rb-tag {
+  font-size: 11px;
+  color: var(--fg-dim, #8b949e);
+  border: 1px solid var(--fret-line);
+  border-radius: 6px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+.rb-tag.saved { color: var(--accent); border-color: var(--accent); }
+
+.rb-song { display: flex; flex-direction: column; gap: 12px; }
+.rb-song-head { font-size: 18px; font-weight: 800; color: var(--accent); }
+.rb-status { font-size: 13px; color: var(--fg-dim, #8b949e); min-height: 18px; }
+.rb-status.error { color: #f08a8a; }
+
+.rb-sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.rb-measure {
+  position: relative;
+  min-height: 58px;
+  border: 1px solid var(--fret-line);
+  border-radius: 8px;
+  background: var(--bg-elev);
+  padding: 16px 4px 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.rb-measure-num { position: absolute; top: 3px; left: 5px; font-size: 9px; color: var(--fg-dim, #8b949e); }
+.rb-chord {
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 6px;
+  line-height: 1.15;
+}
+.rb-chord:active { background: var(--accent-dim); }
+.rb-chord.sel { background: var(--accent); color: #fff; }
+
+.rb-scale-panel { border-top: 1px solid var(--fret-line); padding-top: 12px; min-height: 44px; }
+.rb-scale-sym { font-size: 16px; font-weight: 800; color: var(--accent); margin-bottom: 10px; }
+.rb-scale-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.rb-scale-tag {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--fret-line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.rb-hint { font-size: 13px; color: var(--fg-dim, #8b949e); }

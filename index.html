@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="styles.css?v=24">
+<link rel="stylesheet" href="styles.css?v=25">
 </head>
 <body data-view="home">
 
@@ -35,6 +35,11 @@
       <span class="card-icon">🎵</span>
       <span class="card-title">지판 연습</span>
       <span class="card-sub">실제 비율 지판 · 눌러서 소리 · 슬라이드로 이동</span>
+    </button>
+    <button class="menu-card" data-go="realbook" type="button">
+      <span class="card-icon">📖</span>
+      <span class="card-title">Real Book</span>
+      <span class="card-sub">재즈 스탠다드 코드 진행 · 마디별 스케일</span>
     </button>
   </main>
 </div>
@@ -137,6 +142,26 @@
       </div>
     </form>
   </dialog>
+</div>
+
+<!-- ── REAL BOOK (스탠다드 코드 진행 + 스케일) ───────────── -->
+<div class="view" id="view-realbook">
+  <header class="topbar">
+    <button class="icon-btn" data-back aria-label="메인으로">←</button>
+    <span class="topbar-title">Real Book</span>
+    <button id="rbBackList" class="icon-btn" aria-label="곡 목록" hidden>☰</button>
+  </header>
+
+  <main class="rb-main">
+    <div id="rbList" class="rb-list"></div>
+
+    <div id="rbSong" class="rb-song" hidden>
+      <div id="rbSongHead" class="rb-song-head"></div>
+      <div id="rbStatus" class="rb-status"></div>
+      <div id="rbSheet" class="rb-sheet"></div>
+      <div id="rbScalePanel" class="rb-scale-panel"></div>
+    </div>
+  </main>
 </div>
 
 <!-- ── PRACTICE (Guitar Neck) ────────────────────────── -->
@@ -265,7 +290,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=24"></script>
+<script src="app.js?v=25"></script>
 <script>
 if ('serviceWorker' in navigator) {
   let reloading = false;

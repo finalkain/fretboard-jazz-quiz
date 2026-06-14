@@ -1289,6 +1289,15 @@ body.show-notes .cell.fret-0::after { display: none; }
 .rb-scale-tag.on { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
 .rb-fd-wrap { margin-top: 12px; }
 .rb-fd { display: flex; flex-direction: column; gap: 2px; overflow-x: auto; }
+.rb-fd-forms { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.rb-fd-form {
+  background: var(--bg-elev-2); border: 1px solid var(--fret-line); color: var(--fg);
+  border-radius: 8px; padding: 6px 11px; font-size: 12px; font-weight: 600;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.rb-fd-form.on { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
+.rb-fd-cell.in-box { background: rgba(88,166,255,0.12); }
+.rb-fd-dot.dim { opacity: 0.16; }
 .rb-fd-grid { display: grid; min-width: 320px; }
 .rb-fd-strlbl {
   display: flex; align-items: center; justify-content: center;

@@ -1563,8 +1563,18 @@ const RB_SCHEMA = {
         additionalProperties: false,
       },
     },
+    keyDoc: {
+      type: 'object',
+      properties: {
+        center: { type: 'string' },
+        summary: { type: 'string' },
+        steps: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['center', 'summary', 'steps'],
+      additionalProperties: false,
+    },
   },
-  required: ['title', 'key', 'measures'],
+  required: ['title', 'key', 'measures', 'keyDoc'],
   additionalProperties: false,
 };
 
@@ -1574,7 +1584,8 @@ const rbPrompt = (title) =>
 - measures는 곡의 마디 순서대로 담으세요. 각 마디(measure)에는 그 마디에서 연주되는 코드를 chords 배열로 넣으세요(보통 마디당 1개, 때때로 2개).
 - AABA·ABAC 등 곡의 전체 폼을 가능한 한 모두 포함하세요(보통 32마디).
 - 코드 심볼은 표준 표기로(예: Cmaj7, Am7, D7, G7, Bm7b5, F#m7b5).
-- 각 코드마다 즉흥연주에 쓸 수 있는 대표 스케일을 1~3개 scales에 한국어로 적으세요(예: "D 도리안", "G 믹솔리디안", "C 메이저", "A 얼터드", "F 리디안").`;
+- 각 코드마다 즉흥연주에 쓸 수 있는 대표 스케일을 1~3개 scales에 한국어로 적으세요(예: "D 도리안", "G 믹솔리디안", "C 메이저", "A 얼터드", "F 리디안").
+- keyDoc: 이 곡의 중심 조성을 코드만 보고 찾는 법을 한국어로 설명하세요. center(중심키), summary(한 줄 요약), steps(ii–V–I·첫끝 코드·종지·임시 전조 등을 근거로 3~6단계).`;
 
 // Real Book 5th ed.에서 직접 옮긴 코드 진행 (API 없이 사용). m = 마디별 코드 배열.
 const REALBOOK_DATA = {
@@ -1653,8 +1664,9 @@ const SCALE_INTERVALS = {
 };
 const NOTE_TO_PC = { C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,'E#':5,Fb:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11,Cb:11 };
 
-// 스케일 이름("E 믹솔리디안") → 지판 다이어그램 DOM
-function renderScaleDiagram(scaleName) {
+// 스케일 이름("E 믹솔리디안") → 지판 다이어그램 DOM. shape = ALL|C|A|G|E|D
+function renderScaleDiagram(scaleName, shape) {
+  shape = shape || 'ALL';
   const wrap = document.createElement('div');
   wrap.className = 'rb-fd';
   const mm = /^([A-G][#b]?)\s+(.+)$/.exec(scaleName || '');
@@ -1665,6 +1677,24 @@ function renderScaleDiagram(scaleName) {
     return wrap;
   }
   const pcs = new Set(ivs.map(i => (rootPc + i) % 12));
+
+  // CAGED 폼 선택 (포지션별 손 위치)
+  const forms = document.createElement('div');
+  forms.className = 'rb-fd-forms';
+  [['ALL','전체'],['C','C형'],['A','A형'],['G','G형'],['E','E형'],['D','D형']].forEach(([sh, label]) => {
+    const fb = document.createElement('button');
+    fb.type = 'button';
+    fb.className = 'rb-fd-form' + (sh === shape ? ' on' : '');
+    fb.textContent = label;
+    fb.addEventListener('click', () => {
+      const nw = renderScaleDiagram(scaleName, sh);
+      if (wrap.parentNode) wrap.parentNode.replaceChild(nw, wrap);
+    });
+    forms.appendChild(fb);
+  });
+  wrap.appendChild(forms);
+
+  const box = (shape !== 'ALL') ? computeBox(rootPc, shape) : null;   // {start,end} 프렛 범위
   const FR = 12;
   const order = [5,4,3,2,1,0];   // 위=1번줄(고음) … 아래=6번줄(저음)
   const cols = `20px repeat(${FR + 1}, 1fr)`;
@@ -1678,13 +1708,14 @@ function renderScaleDiagram(scaleName) {
     lbl.textContent = 6 - s;
     grid.appendChild(lbl);
     for (let f = 0; f <= FR; f++) {
+      const inBox = box ? (f >= box.start && f <= box.end) : true;
       const cell = document.createElement('div');
-      cell.className = 'rb-fd-cell' + (f === 0 ? ' nut' : '');
+      cell.className = 'rb-fd-cell' + (f === 0 ? ' nut' : '') + (box && inBox ? ' in-box' : '');
       const pc = (STRING_OPEN_PC[s] + f) % 12;
       if (pcs.has(pc)) {
         const dot = document.createElement('button');
         dot.type = 'button';
-        dot.className = 'rb-fd-dot' + (pc === rootPc ? ' root' : '');
+        dot.className = 'rb-fd-dot' + (pc === rootPc ? ' root' : '') + (box && !inBox ? ' dim' : '');
         dot.textContent = noteName(pc);
         dot.addEventListener('click', () => playNote(STRING_OPEN_MIDI[s] + f, 0, 0.8, 0.28));
         cell.appendChild(dot);
@@ -1803,7 +1834,8 @@ function renderKeyDoc(title, data, msg) {
 function analyzeKey() {
   if (!rbCurrentSong) return;
   const title = rbCurrentSong.title;
-  const doc = REALBOOK_DOC[title];
+  // 내장 설명 우선, 없으면 API로 받아온 곡 데이터의 keyDoc 사용
+  const doc = REALBOOK_DOC[title] || rbCurrentSong.keyDoc;
   renderKeyDoc(title, doc || null, doc ? '' : '이 곡의 중심키 설명은 아직 준비 중이에요.');
 }
 const rbStatus = (msg, err) => {

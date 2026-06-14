@@ -1283,3 +1283,32 @@ body.show-notes .cell.fret-0::after { display: none; }
   font-size: 13px;
 }
 .rb-hint { font-size: 13px; color: var(--fg-dim, #8b949e); }
+
+/* ── Real Book: scale fretboard diagram ───────────── */
+.rb-scale-tag { cursor: pointer; font-family: inherit; color: var(--fg); }
+.rb-scale-tag.on { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
+.rb-fd-wrap { margin-top: 12px; }
+.rb-fd { display: flex; flex-direction: column; gap: 2px; overflow-x: auto; }
+.rb-fd-grid { display: grid; min-width: 320px; }
+.rb-fd-strlbl {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--fg-dim, #8b949e); height: 30px;
+}
+.rb-fd-cell {
+  position: relative; height: 30px;
+  border-bottom: 1px solid var(--fret-line);
+  border-right: 1px solid var(--fret-line);
+  display: flex; align-items: center; justify-content: center;
+}
+.rb-fd-cell.nut { border-right: 3px solid var(--fg-dim, #8b949e); }
+.rb-fd-dot {
+  width: 24px; height: 24px; border-radius: 50%; border: none;
+  background: #2ec4b6; color: #fff; font-size: 10px; font-weight: 800;
+  cursor: pointer; font-family: inherit; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.rb-fd-dot.root { background: var(--bad, #f85149); }
+.rb-fd-dot:active { transform: scale(1.18); }
+.rb-fd-nums { display: grid; min-width: 320px; }
+.rb-fd-num { text-align: center; font-size: 9px; color: var(--fg-dim, #8b949e); }
+.rb-fd-na { font-size: 13px; color: var(--fg-dim, #8b949e); padding: 8px; }

@@ -1635,6 +1635,78 @@ function buildFixedSong(title, fixed) {
   };
 }
 
+// 스케일(한국어) → 반음 인터벌
+const SCALE_INTERVALS = {
+  '아이오니안': [0,2,4,5,7,9,11], '메이저': [0,2,4,5,7,9,11],
+  '리디안': [0,2,4,6,7,9,11],
+  '믹솔리디안': [0,2,4,5,7,9,10],
+  '도리안': [0,2,3,5,7,9,10],
+  '에올리안': [0,2,3,5,7,8,10], '내추럴 마이너': [0,2,3,5,7,8,10],
+  '프리지안': [0,1,3,5,7,8,10],
+  '로크리안': [0,1,3,5,6,8,10],
+  '얼터드': [0,1,3,4,6,8,10],
+  '디미니쉬드': [0,2,3,5,6,8,9,11],
+  '홀톤': [0,2,4,6,8,10],
+  '리디안 ♭7': [0,2,4,6,7,9,10],
+  '하모닉 마이너': [0,2,3,5,7,8,11],
+  '멜로딕 마이너': [0,2,3,5,7,9,11],
+};
+const NOTE_TO_PC = { C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,'E#':5,Fb:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11,Cb:11 };
+
+// 스케일 이름("E 믹솔리디안") → 지판 다이어그램 DOM
+function renderScaleDiagram(scaleName) {
+  const wrap = document.createElement('div');
+  wrap.className = 'rb-fd';
+  const mm = /^([A-G][#b]?)\s+(.+)$/.exec(scaleName || '');
+  const rootPc = mm ? NOTE_TO_PC[mm[1]] : undefined;
+  const ivs = mm ? SCALE_INTERVALS[mm[2].trim()] : undefined;
+  if (rootPc == null || !ivs) {
+    wrap.innerHTML = '<div class="rb-fd-na">이 스케일의 지판 그림은 아직 준비 중이에요.</div>';
+    return wrap;
+  }
+  const pcs = new Set(ivs.map(i => (rootPc + i) % 12));
+  const FR = 12;
+  const order = [5,4,3,2,1,0];   // 위=1번줄(고음) … 아래=6번줄(저음)
+  const cols = `20px repeat(${FR + 1}, 1fr)`;
+
+  const grid = document.createElement('div');
+  grid.className = 'rb-fd-grid';
+  grid.style.gridTemplateColumns = cols;
+  order.forEach(s => {
+    const lbl = document.createElement('div');
+    lbl.className = 'rb-fd-strlbl';
+    lbl.textContent = 6 - s;
+    grid.appendChild(lbl);
+    for (let f = 0; f <= FR; f++) {
+      const cell = document.createElement('div');
+      cell.className = 'rb-fd-cell' + (f === 0 ? ' nut' : '');
+      const pc = (STRING_OPEN_PC[s] + f) % 12;
+      if (pcs.has(pc)) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'rb-fd-dot' + (pc === rootPc ? ' root' : '');
+        dot.textContent = noteName(pc);
+        dot.addEventListener('click', () => playNote(STRING_OPEN_MIDI[s] + f, 0, 0.8, 0.28));
+        cell.appendChild(dot);
+      }
+      grid.appendChild(cell);
+    }
+  });
+
+  const nums = document.createElement('div');
+  nums.className = 'rb-fd-nums';
+  nums.style.gridTemplateColumns = cols;
+  nums.appendChild(document.createElement('div'));
+  for (let f = 0; f <= FR; f++) {
+    const n = document.createElement('div');
+    n.className = 'rb-fd-num';
+    if ([0,3,5,7,9,12].includes(f)) n.textContent = f;
+    nums.appendChild(n);
+  }
+  wrap.append(grid, nums);
+  return wrap;
+}
+
 let rbInited = false;
 const RB_CACHE = 'realbookCache';
 const getRbCache = () => { try { return JSON.parse(localStorage.getItem(RB_CACHE) || '{}'); } catch (_) { return {}; } };
@@ -1763,13 +1835,24 @@ function showSongScales(ch, btn) {
   panel.appendChild(h);
   const list = document.createElement('div');
   list.className = 'rb-scale-list';
+  const diagram = document.createElement('div');
+  diagram.className = 'rb-fd-wrap';
   (ch.scales || []).forEach(s => {
-    const tag = document.createElement('span');
+    const tag = document.createElement('button');
+    tag.type = 'button';
     tag.className = 'rb-scale-tag';
     tag.textContent = s;
+    tag.addEventListener('click', () => {
+      list.querySelectorAll('.rb-scale-tag.on').forEach(t => t.classList.remove('on'));
+      tag.classList.add('on');
+      diagram.innerHTML = '';
+      diagram.appendChild(renderScaleDiagram(s));
+    });
     list.appendChild(tag);
   });
-  panel.appendChild(list);
+  panel.append(list, diagram);
+  const first = list.querySelector('.rb-scale-tag');
+  if (first) first.click();   // 첫 스케일 지판 자동 표시
 }
 
 // ── View navigation ───────────────────────────

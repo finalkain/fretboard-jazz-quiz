@@ -1708,9 +1708,104 @@ function renderScaleDiagram(scaleName) {
 }
 
 let rbInited = false;
+let rbCurrentSong = null;   // 현재 표시 중인 곡 데이터
 const RB_CACHE = 'realbookCache';
 const getRbCache = () => { try { return JSON.parse(localStorage.getItem(RB_CACHE) || '{}'); } catch (_) { return {}; } };
 const setRbCache = (c) => localStorage.setItem(RB_CACHE, JSON.stringify(c));
+
+// 중심키 설명 (모두 내장 — API 미사용). 자유롭게 수정/추가하세요.
+const REALBOOK_DOC = {
+  'All Of Me': {
+    center: 'C 메이저',
+    summary: '시작·끝이 모두 C이고 Dm7–G7–C 의 ii–V–I 로 닫히는 전형적인 C장조 곡.',
+    steps: [
+      '첫 코드가 Cmaj7, 마지막이 C6 입니다. 시작과 끝이 같은 C → 으뜸음(중심)이 C일 가능성이 큽니다.',
+      '29~31마디 Dm7 → G7 → C6 는 C장조의 ii–V–I 종지입니다. 이 진행이 곡을 C로 확실히 닫아줍니다.',
+      '중간의 E7·A7·D7 는 C장조 다이아토닉이 아니라 다음 코드로 끌어주는 세컨더리 도미넌트입니다(E7→Am, A7→Dm, D7→G). 잠깐 색만 줄 뿐 중심키는 그대로입니다.',
+      '뼈대 코드(Cmaj7·Dm7·Em7·Fmaj7·G7·Am7)가 C장조 다이아토닉이고 ii–V–I 로 닫히므로 중심키는 C 메이저.',
+    ],
+  },
+  'Autumn Leaves': {
+    center: 'G 메이저 / E 마이너 (상대조)',
+    summary: '앞부분은 G장조 ii–V–I, 곡은 E단조로 끝나는 상대조 관계의 곡.',
+    steps: [
+      'Am7 → D7 → Gmaj7 는 G장조의 ii–V–I 입니다. 앞 3마디가 곧바로 G장조를 가리킵니다.',
+      'F#m7b5 → B7 → Em 은 E단조의 ii–V–i 입니다(단조라 도미넌트가 B7). 곡을 E단조로 끌어옵니다.',
+      'G장조와 E단조는 조표가 같은 상대조(병행조)라 한 곡 안에서 자연스럽게 오갑니다.',
+      '마지막 코드가 Em → 끝나는 코드가 중심을 알려주는 강한 단서. 최종 중심은 E 마이너, 큰 틀은 G장조/E단조.',
+    ],
+  },
+  'Beautiful Love': {
+    center: 'D 마이너',
+    summary: 'Em7b5–A7–Dm 의 단조 ii–V–i 가 반복되고 Dm 으로 끝나는 D단조 곡.',
+    steps: [
+      'Em7b5 → A7 → Dm 은 D단조의 ii–V–i 입니다(2도 자리의 m7b5 + 도미넌트 A7).',
+      '이 ii–V–i 가 곡 곳곳에서 반복되며 D 를 계속 으뜸음으로 확인시켜 줍니다.',
+      'Gm7·Bb7·C7 등은 D단조와 가까운 코드로 색을 더할 뿐입니다.',
+      '곡이 Dm 으로 끝납니다 → 중심키는 D 마이너.',
+    ],
+  },
+  'Oleo': {
+    center: 'Bb 메이저',
+    summary: "‘I Got Rhythm’ 코드(리듬 체인지)로 Bbmaj7 로 시작·끝나는 Bb장조 곡.",
+    steps: [
+      'A파트는 Bbmaj7–G7–Cm7–F7 의 I–VI–ii–V 순환입니다. 첫 코드가 Bbmaj7 → 중심 Bb.',
+      'Cm7–F7 은 Bb장조의 ii–V, 다시 Bbmaj7(I)로 돌아옵니다.',
+      '브릿지는 D7–G7–C7–F7 로 3도씩 내려가는 도미넌트 연쇄이며, 마지막 F7(V)이 다시 Bb(I)로 풀립니다.',
+      '시작과 끝이 Bbmaj7 → 중심키는 Bb 메이저.',
+    ],
+  },
+  'Satin Doll': {
+    center: 'C 메이저',
+    summary: 'Dm7–G7 의 ii–V 가 반복되고 C 로 풀리는 C장조 곡.',
+    steps: [
+      '첫 마디부터 Dm7 → G7, 즉 C장조의 ii–V 로 시작합니다.',
+      'Em7–A7, Am7–D7, Abm7–Db7 은 다음 ii–V 로 이어주는 연쇄(세컨더리 ii–V)입니다.',
+      '이 ii–V 들이 결국 C6(I)로 해결됩니다.',
+      '브릿지는 Gm7–C7(잠깐 F장조 쪽), Am7–D7 로 색을 바꾸지만 다시 C 로 돌아옵니다 → 중심키 C 메이저.',
+    ],
+  },
+  "Take The 'A' Train": {
+    center: 'C 메이저',
+    summary: 'C 로 시작해 D7(#11)–Dm7–G7–C 로 풀리는 C장조 곡.',
+    steps: [
+      '첫 코드가 C(C6) 입니다. 중심 후보는 C.',
+      'D7b5(=D7#11)은 C장조의 II7(리디안 도미넌트)로 특유의 색을 주지만, 이어서 Dm7–G7 의 ii–V 로 연결됩니다.',
+      'Dm7 → G7 → C 는 C장조의 ii–V–I 종지입니다.',
+      '브릿지는 F(IV)로 잠깐 갔다가 D7–Dm7–G7 로 다시 C 로 돌아옵니다 → 중심키 C 메이저.',
+    ],
+  },
+};
+
+function renderKeyDoc(title, data, msg) {
+  const dlg   = document.getElementById('rbKeyDialog');
+  const body  = document.getElementById('rbKeyBody');
+  document.getElementById('rbKeyTitle').textContent = title + ' — 중심키 찾기';
+  if (!data) {
+    const err = msg && /(실패|필요|없)/.test(msg);
+    body.innerHTML = `<div class="rb-key-msg${err ? ' err' : ''}">${msg || ''}</div>`;
+  } else {
+    body.innerHTML = '';
+    const c = document.createElement('div');
+    c.className = 'rb-key-center';
+    c.textContent = '중심키: ' + data.center;
+    const s = document.createElement('div');
+    s.className = 'rb-key-summary';
+    s.textContent = data.summary || '';
+    const ol = document.createElement('ol');
+    ol.className = 'rb-key-steps';
+    (data.steps || []).forEach(st => { const li = document.createElement('li'); li.textContent = st; ol.appendChild(li); });
+    body.append(c, s, ol);
+  }
+  if (dlg.showModal && !dlg.open) dlg.showModal(); else if (!dlg.showModal) dlg.setAttribute('open', '');
+}
+
+function analyzeKey() {
+  if (!rbCurrentSong) return;
+  const title = rbCurrentSong.title;
+  const doc = REALBOOK_DOC[title];
+  renderKeyDoc(title, doc || null, doc ? '' : '이 곡의 중심키 설명은 아직 준비 중이에요.');
+}
 const rbStatus = (msg, err) => {
   const el = document.getElementById('rbStatus');
   if (!el) return;
@@ -1723,6 +1818,7 @@ function initRealBook() {
   rbInited = true;
   renderSongList();
   document.getElementById('rbBackList').addEventListener('click', showSongList);
+  document.getElementById('rbKeyBtn').addEventListener('click', analyzeKey);
 }
 
 function renderSongList() {
@@ -1802,6 +1898,7 @@ function renderSong(data) {
   const panel = document.getElementById('rbScalePanel');
   sheet.innerHTML = '';
   panel.innerHTML = '';
+  rbCurrentSong = data || null;
   if (!data) return;
   head.textContent = data.title + (data.key ? '  ·  ' + data.key : '');
   (data.measures || []).forEach((m, i) => {

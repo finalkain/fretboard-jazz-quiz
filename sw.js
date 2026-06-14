@@ -1,10 +1,10 @@
 // Bump CACHE_VERSION whenever assets change so users get the update.
-const CACHE_VERSION = 'fretquiz-v28';
+const CACHE_VERSION = 'fretquiz-v29';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=28',
-  './app.js?v=28',
+  './styles.css?v=29',
+  './app.js?v=29',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',

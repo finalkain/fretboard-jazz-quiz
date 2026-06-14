@@ -1312,3 +1312,25 @@ body.show-notes .cell.fret-0::after { display: none; }
 .rb-fd-nums { display: grid; min-width: 320px; }
 .rb-fd-num { text-align: center; font-size: 9px; color: var(--fg-dim, #8b949e); }
 .rb-fd-na { font-size: 13px; color: var(--fg-dim, #8b949e); padding: 8px; }
+
+/* ── Real Book: 중심키 분석 ────────────────────────── */
+.rb-key-btn {
+  align-self: flex-start;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+.rb-key-btn:active { background: var(--accent-dim); color: #fff; }
+.rb-key-body { font-size: 14px; line-height: 1.6; }
+.rb-key-center { font-size: 16px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+.rb-key-summary { color: var(--fg); margin-bottom: 12px; }
+.rb-key-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--fg); }
+.rb-key-steps li { line-height: 1.55; }
+.rb-key-msg { font-size: 14px; color: var(--fg-dim, #8b949e); padding: 8px 0; }
+.rb-key-msg.err { color: #f08a8a; }

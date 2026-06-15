@@ -1589,86 +1589,95 @@ const rbPrompt = (title) =>
 
 // Real Book 5th ed.에서 직접 옮긴 코드 진행 (API 없이 사용). m = 마디별 코드 배열.
 const REALBOOK_DATA = {
-  'All Of Me': { key: 'C Major', m: [
-    ['Cmaj7'],['Cmaj7'],['E7'],['E7'],['A7'],['A7'],['Dm7'],['Dm7'],
-    ['E7'],['E7'],['Am7'],['Am7'],['D7'],['D7'],['Dm7'],['G7'],
-    ['Cmaj7'],['Cmaj7'],['E7'],['E7'],['A7'],['A7'],['Dm7'],['Dm7'],
-    ['Fmaj7'],['Fm6'],['Cmaj7','Em7'],['A7'],['Dm7'],['G7'],['C6'],['Ebdim7','Dm7','G7'] ] },
-  'Autumn Leaves': { key: 'G Major / E minor', m: [
-    ['Am7'],['D7'],['Gmaj7'],['Cmaj7'],['F#m7b5'],['B7'],['Em7'],['Em7'],
-    ['Am7'],['D7'],['Gmaj7'],['Cmaj7'],['F#m7b5'],['B7'],['Em7'],['Em7'],
-    ['F#m7b5'],['B7'],['Em7'],['Em7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],
-    ['F#m7b5'],['B7b9'],['Em7','Eb7'],['Dm7','Db7'],['Cmaj7'],['B7b9'],['Em7'],['Em7'] ] },
-  'Beautiful Love': { key: 'D minor', m: [
-    ['Em7b5'],['A7b9'],['Dm7'],['Dm7'],['Gm7'],['C7'],['Fmaj7'],['Em7b5','A7'],
-    ['Dm7'],['Gm7'],['Bb7'],['Em7b5','A7'],['Dm7'],['Gm7'],['Em7b5'],['A7b9'],
-    ['Em7b5'],['A7b9'],['Dm7'],['Dm7'],['Gm7'],['C7'],['Fmaj7'],['Em7b5','A7'],
-    ['Dm7'],['Gm7'],['Bb7'],['Em7b5','A7'],['Dm7'],['Bb7','A7'],['Dm7'],['Dm7'] ] },
-  'Oleo': { key: 'Bb Major', m: [
-    ['Bbmaj7','G7'],['Cm7','F7'],['Bbmaj7','G7'],['Cm7','F7'],['Fm7','Bb7'],['Ebmaj7','Ebm6'],['Bbmaj7','G7'],['Cm7','F7'],
-    ['Bbmaj7','G7'],['Cm7','F7'],['Bbmaj7','G7'],['Cm7','F7'],['Fm7','Bb7'],['Ebmaj7','Ebm6'],['Bbmaj7','G7'],['Bbmaj7'],
-    ['D7'],['D7'],['G7'],['G7'],['C7'],['C7'],['F7'],['F7'],
-    ['Bbmaj7','G7'],['Cm7','F7'],['Bbmaj7','G7'],['Cm7','F7'],['Fm7','Bb7'],['Ebmaj7','Ebm6'],['Bbmaj7','G7'],['Bbmaj7'] ] },
-  'Satin Doll': { key: 'C Major', m: [
-    ['Dm7','G7'],['Dm7','G7'],['Em7','A7'],['Em7','A7'],['Am7','D7'],['Abm7','Db7'],['C6'],['Em7b5','A7b9'],
-    ['Dm7','G7'],['Dm7','G7'],['Em7','A7'],['Em7','A7'],['Am7','D7'],['Abm7','Db7'],['C6'],['C6'],
-    ['Gm7','C7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Am7','D7'],['Am7','D7'],['Dm7','G7'],['Em7','A7'],
-    ['Dm7','G7'],['Dm7','G7'],['Em7','A7'],['Em7','A7'],['Am7','D7'],['Abm7','Db7'],['C6'],['C6'] ] },
-  "Take The 'A' Train": { key: 'C Major', m: [
-    ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C6'],
-    ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C7'],
-    ['Fmaj7'],['Fmaj7'],['Fmaj7'],['Fmaj7'],['D7'],['D7'],['Dm7'],['G7'],
-    ['C6'],['C6'],['D7b5'],['D7b5'],['Dm7'],['G7'],['C6'],['C6'] ] },
-  'The Days Of Wine And Roses': { key: 'F Major', m: [
-    ['Fmaj7'],['Eb7'],['Dm7b5'],['D7'],['Gm7'],['Gm7'],['Bbm7'],['Eb7'],
-    ['Am7'],['Dm7'],['Gm7'],['C7'],['Em7b5','A7b9'],['Dm7','G7'],['Gm7'],['C7'],
-    ['Fmaj7'],['Eb7'],['Dm7b5'],['D7'],['Gm7'],['Gm7'],['Bbm7'],['Eb7'],
-    ['Am7'],['Dm7'],['Bm7b5'],['Bb7'],['Am7','Dm7'],['Gm7','C7'],['F6'],['Gm7','C7'] ] },
-  'I Love You': { key: 'F Major', m: [
-    ['Gm7b5'],['C7b9'],['Fmaj7'],['Fmaj7'],['Gm7'],['C7'],['Fmaj7'],['Fmaj7'],
-    ['Gm7b5'],['C7b9'],['Fmaj7'],['Bm7','E7'],['Amaj7'],['Bm7','E7'],['Amaj7'],['Amaj7'],
-    ['Gm7'],['C7'],['Fmaj7'],['Fmaj7'],['Am7b5'],['D7b9'],['Gm7'],['C7'],
-    ['Gm7b5'],['C7b9'],['Fmaj7'],['Am7b5','D7'],['Gm7'],['Gm7','C7'],['F6'],['F6'] ] },
-  "I'll Remember April": { key: 'G Major', m: [
-    ['Gmaj7'],['G6'],['Gmaj7'],['G6'],['Gm7'],['Gm6'],['Gm7'],['Gm6'],
-    ['Am7b5'],['D7'],['Bm7b5'],['E7'],['Am7'],['D7'],['G6'],['G#dim7'],
-    ['Cm7'],['F7'],['Bbmaj7'],['Gm7'],['Cm7'],['F7'],['Bbmaj7'],['Bb6'],
-    ['Am7'],['D7'],['Gmaj7'],['G6'],['F#m7'],['B7'],['Em7'],['Am7','D7'],
-    ['Gmaj7'],['G6'],['Gmaj7'],['G6'],['Gm7'],['Gm6'],['Gm7'],['Gm6'],
-    ['Am7b5'],['D7'],['Bm7b5'],['E7'],['Am7'],['D7'],['G6'],['G6'] ] },
-  'Just Friends': { key: 'G Major', m: [
-    ['G7'],['Cmaj7'],['Cmaj7'],['Cm7','F7'],['Gmaj7'],['Gmaj7'],['Bbm7'],['Eb7'],
-    ['Am7'],['D7'],['Bm7'],['E7'],['A7'],['A7'],['Am7'],['D7','Db7'],
-    ['Cmaj7'],['Cmaj7'],['Cm7'],['F7'],['Gmaj7'],['Gmaj7'],['Bbm7'],['Eb7'],
-    ['Am7'],['D7'],['Bm7'],['E7'],['A7'],['Am7','D7'],['G6'],['Dm7','G7'] ] },
-  'Lullaby Of Birdland': { key: 'F minor', m: [
-    ['Fm7'],['G7','C7'],['Fm7'],['Bbm7','Eb7'],['Abmaj7'],['Fm7','Bbm7'],['Eb7'],['Abmaj7'],
-    ['Fm7'],['G7','C7'],['Fm7'],['Bbm7','Eb7'],['Abmaj7'],['Fm7','Bbm7'],['Eb7','Db7'],['C7'],
-    ['Abmaj7'],['F7'],['Bbm7'],['Bbm7','Eb7'],['Abmaj7'],['F7'],['Bbm7'],['Bbm7','Eb7'],
-    ['Fm7'],['G7','C7'],['Fm7'],['Bbm7','Eb7'],['Abmaj7'],['Fm7','Bbm7'],['Eb7'],['Abmaj7'] ] },
-  'Mr. P.C.': { key: 'C minor', m: [
-    ['Cm7'],['Cm7'],['Cm7'],['Cm7'],['Fm7'],['Fm7'],['Cm7'],['Cm7'],
-    ['Dm7b5'],['G7'],['Cm7'],['G7'] ] },
-  'Night And Day': { key: 'C Major', m: [
-    ['Dm7b5'],['G7'],['Cmaj7'],['Cmaj7'],['Dm7b5'],['G7'],['Cmaj7'],['Cmaj7'],
-    ['F#m7b5'],['Fm7'],['Em7'],['Ebdim7'],['Dm7'],['G7'],['Cmaj7'],['Cmaj7'],
-    ['Ebmaj7'],['Ebmaj7'],['Cmaj7'],['Cmaj7'],['Ebmaj7'],['Ebmaj7'],['Cmaj7'],['Cmaj7'],
-    ['F#m7b5'],['Fm7'],['Em7'],['Ebdim7'],['Dm7'],['G7','Dm7'],['C6'],['Dm7','G7'] ] },
-  'Ornithology': { key: 'G Major', m: [
-    ['Gmaj7'],['Gmaj7'],['Gm7','C7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Fm7'],['Bb7'],
-    ['Ebmaj7'],['Am7b5','D7'],['Gmaj7'],['Gmaj7'],['Bm7'],['E7'],['Am7'],['D7'],
-    ['Gmaj7'],['Gmaj7'],['Gm7','C7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Fm7'],['Bb7'],
-    ['Ebmaj7'],['Am7b5','D7'],['Gmaj7'],['A7'],['Am7'],['D7'],['Gmaj7'],['Am7','D7'] ] },
-  'There Is No Greater Love': { key: 'Bb Major', m: [
-    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['C7'],['C7'],['F7'],['F7'],
-    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['C7'],['Cm7','F7'],['Bb6'],['Bb6'],
-    ['Am7b5','D7'],['Gm7'],['Am7b5','D7'],['Gm7'],['Am7b5','D7'],['Gm7'],['C7'],['F7'],
-    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['C7'],['Cm7','F7'],['Bb6'],['F7'] ] },
-  'There Will Never Be Another You': { key: 'Eb Major', m: [
-    ['Ebmaj7'],['Ebmaj7'],['Dm7b5'],['G7b9'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],
-    ['Abmaj7'],['Fm7b5','Bb7'],['Ebmaj7'],['Cm7'],['F7'],['Cm7','F7'],['Fm7'],['Bb7'],
-    ['Ebmaj7'],['Ebmaj7'],['Dm7b5'],['G7b9'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],
-    ['Abmaj7'],['Fm7b5','Bb7'],['Ebmaj7'],['Gm7','C7'],['Fm7'],['Bb7'],['Eb6'],['Bb7'] ] },
+  'All Of Me': { key: 'C Major', bpm: 130, m: [
+    ['Cmaj7'],['Cmaj7'],['E7'],['E7'],['A7'],['A7'],['Dm7'],['Dm7'],['E7'],['E7'],['Am7'],['Am7'],['D7'],['D7'],['Dm7'],['G7'],
+    ['Cmaj7'],['Cmaj7'],['E7'],['E7'],['A7'],['A7'],['Dm7'],['Dm7'],['F6'],['Fm6'],['Cmaj7'],['A7'],['Dm7'],['G7'],['Cmaj7'],['Cmaj7'] ] },
+  'Autumn Leaves': { key: 'G Major / E minor', bpm: 130, m: [
+    ['Am7'],['D7'],['Gmaj7'],['Cmaj7'],['F#m7b5'],['B7'],['Em7'],['Em7'],['Am7'],['D7'],['Gmaj7'],['Cmaj7'],['F#m7b5'],['B7'],['Em7'],['Em7'],
+    ['F#m7b5'],['B7'],['Em7'],['Em7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],['F#m7b5'],['B7b9'],['Em7','Eb7'],['Dm7','Db7'],['Cmaj7'],['B7b9'],['Em7'],['Em7'] ] },
+  'Bye Bye Blackbird': { key: 'F Major', bpm: 140, m: [
+    ['Fmaj7'],['Fmaj7'],['Gm7'],['C7'],['Gm7'],['C7'],['Fmaj7'],['Fmaj7'],['Bbm7'],['Eb7'],['Fmaj7'],['Fmaj7'],['Dm7'],['G7'],['Gm7'],['C7'],
+    ['Fmaj7'],['Fmaj7'],['Gm7'],['C7'],['Gm7'],['C7'],['Fmaj7'],['Fmaj7'],['Bbm7'],['Eb7'],['Fmaj7'],['Fmaj7'],['Dm7'],['G7'],['Gm7','C7'],['Fmaj7'] ] },
+  'Beautiful Love': { key: 'E minor / G Major', bpm: 120, m: [
+    ['Em7'],['A7'],['Dmaj7'],['Dmaj7'],['Bm7b5'],['E7'],['Am7'],['Am7'],['F#m7b5'],['B7'],['Em7'],['Em7'],['Cm7'],['F7'],['Bmaj7'],['Bmaj7'],
+    ['Bm7b5'],['E7'],['Am7'],['Am7'],['F#m7b5'],['B7'],['Em7'],['Em7'],['Em7'],['A7'],['Dmaj7'],['Dmaj7'],['F#m7b5'],['B7'],['Em7'],['Em7'] ] },
+  "Billie's Bounce": { key: 'F Major (Blues)', bpm: 190, m: [
+    ['F7'],['Bb7'],['F7'],['Cm7','F7'],['Bb7'],['Bdim7'],['F7'],['Am7','D7'],['Gm7'],['C7'],['F7','D7'],['Gm7','C7'] ] },
+  'But Not For Me': { key: 'Eb Major', bpm: 160, m: [
+    ['Ebmaj7'],['Ebmaj7'],['Fm7'],['Bb7'],['Gm7'],['C7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ab7'],['Ebmaj7'],['Cm7'],['F7'],['F7'],['Fm7','Bb7'],['Ebmaj7'],
+    ['Ebmaj7'],['Ebmaj7'],['Fm7'],['Bb7'],['Gm7'],['C7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ab7'],['Ebmaj7'],['Cm7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ebmaj7'] ] },
+  'Candy': { key: 'C Major', bpm: 120, m: [
+    ['Cmaj7'],['Am7'],['Dm7'],['G7'],['Em7'],['A7'],['Dm7'],['G7'],['Cmaj7'],['Cm7','F7'],['Bbmaj7'],['Bbmaj7'],['Am7'],['D7'],['Dm7','G7'],['Cmaj7'],
+    ['Cmaj7'],['Am7'],['Dm7'],['G7'],['Em7'],['A7'],['Dm7'],['G7'],['Cmaj7'],['Cm7','F7'],['Bbmaj7'],['Bbmaj7'],['Am7'],['D7'],['Dm7','G7'],['Cmaj7'] ] },
+  'Day By Day': { key: 'C Major', bpm: 130, m: [
+    ['Cmaj7'],['Cmaj7'],['Dm7'],['G7'],['Em7'],['Am7'],['Dm7','G7'],['Cmaj7'],['Cmaj7'],['Cmaj7'],['Dm7'],['G7'],['Em7'],['Am7'],['Dm7','G7'],['Cmaj7'],
+    ['Fmaj7'],['Fmaj7'],['Em7'],['A7'],['Dm7'],['G7'],['Cmaj7'],['Cmaj7'],['Cmaj7'],['Cmaj7'],['Dm7'],['G7'],['Em7'],['Am7'],['Dm7','G7'],['Cmaj7'] ] },
+  'The Days Of Wine And Roses': { key: 'F Major', bpm: 140, m: [
+    ['Fmaj7'],['Eb7'],['Am7'],['D7'],['Gm7'],['Gm7'],['Bbm'],['Eb7'],['Am7'],['Dm7'],['Gm7'],['C7'],['Em7b5'],['A7'],['Dm7'],['G7'],
+    ['Fmaj7'],['Eb7'],['Am7'],['D7'],['Gm7'],['Gm7'],['Bbm7b5'],['Bb7'],['Am7'],['Dm7','Dm/C'],['Gm7'],['C7'],['Am7','Dm7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'] ] },
+  'Fly Me To The Moon': { key: 'C Major', bpm: 140, m: [
+    ['Am7'],['Dm7'],['G7'],['Cmaj7'],['Fmaj7'],['Bm7b5'],['E7'],['Am7'],['Dm7'],['G7'],['Cmaj7'],['E7'],
+    ['Am7'],['Dm7'],['G7'],['Cmaj7'],['Fmaj7'],['Bm7b5'],['E7'],['Am7','A7'],['Dm7'],['G7'],['Cmaj7','Am7'],['Dm7','G7'] ] },
+  'I Love You': { key: 'Bb Major', bpm: 130, m: [
+    ['Bbmaj7'],['Gm7'],['Cm7'],['F7'],['Bbmaj7'],['Bbm7','Eb7'],['Abmaj7'],['Abmaj7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],['Gm7'],['C7'],['Cm7','F7'],['Bbmaj7'],
+    ['Bbmaj7'],['Gm7'],['Cm7'],['F7'],['Bbmaj7'],['Bbm7','Eb7'],['Abmaj7'],['Abmaj7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],['Cm7'],['F7'],['Bbmaj7'],['Bbmaj7'] ] },
+  "I'll Remember April": { key: 'G Major', bpm: 190, m: [
+    ['Gmaj7'],['Gmaj7'],['Gmaj7'],['Gmaj7'],['Gm7'],['Gm7'],['C7'],['C7'],['Gmaj7'],['Gmaj7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],['Gmaj7'],['Gmaj7'],
+    ['Cm7'],['Cm7'],['F7'],['F7'],['Bbmaj7'],['Bbmaj7'],['Bm7'],['E7'],['Amaj7'],['Amaj7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],['Am7','D7'],['Gmaj7'] ] },
+  "I'll Close My Eyes": { key: 'Bb Major', bpm: 100, m: [
+    ['Bbmaj7'],['Gm7'],['Cm7'],['F7'],['Dm7'],['G7'],['Cm7'],['F7'],['Bbmaj7'],['Bb7'],['Ebmaj7'],['Ebmaj7'],['Em7b5'],['A7'],['Dm7'],['G7'],
+    ['Cm7'],['F7'],['Bbmaj7'],['Bbmaj7'],['Bbmaj7'],['Gm7'],['Cm7'],['F7'],['Dm7'],['G7'],['Cm7'],['F7'],['Bbmaj7'],['Bbmaj7'],['Cm7','F7'],['Bbmaj7'] ] },
+  'It Could Happen To You': { key: 'Eb Major', bpm: 120, m: [
+    ['Ebmaj7'],['Cm7'],['Fm7'],['Bb7'],['Gm7'],['C7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ab7'],['Gm7'],['C7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ebmaj7'],
+    ['Abmaj7'],['Abm7'],['Ebmaj7'],['Ebmaj7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ebmaj7'],['Ebmaj7'],['Cm7'],['Fm7'],['Bb7'],['Gm7','C7'],['Fm7','Bb7'],['Ebmaj7'],['Ebmaj7'] ] },
+  'Just Friends': { key: 'C Major', bpm: 160, m: [
+    ['Cmaj7'],['Cmaj7'],['Cm7'],['F7'],['Bbmaj7'],['Bbmaj7'],['Bbm7'],['Eb7'],['Abmaj7'],['Abmaj7'],['Am7'],['D7'],['Gmaj7'],['Gmaj7'],['F#m7b5'],['B7'],
+    ['Em7'],['A7'],['Am7','D7'],['Gmaj7'],['Cmaj7'],['Cmaj7'],['Cm7'],['F7'],['Bbmaj7'],['Bbmaj7'],['Bbm7'],['Eb7'],['Am7'],['D7'],['F#m7b5','B7'],['Em7'],
+    ['A7'],['Am7','D7'],['G6'],['Dm7','G7'] ] },
+  'Lullaby Of Birdland': { key: 'A minor', bpm: 145, m: [
+    ['Am7'],['B7','E7'],['Am7'],['Dm7','C'],['Dm7'],['Am7'],['Bm7b5','E7'],['Am7'],['Am7'],['B7','E7'],['Am7'],['Dm7','C'],['Dm7'],['Am7'],['Em7b5','A7'],['Dm7'],
+    ['Em7b5'],['A7'],['Dm7'],['Dm7'],['C7'],['C7'],['F'],['Bm7b5','E7'],['Am7'],['B7','E7'],['Am7'],['Dm7','C'],['Dm7'],['Am7'],['Bm7b5','E7'],['Am7'] ] },
+  'Moritat': { key: 'G Major', bpm: 140, m: [
+    ['G'],['G'],['B7'],['B7'],['Em'],['Em'],['Am'],['D7'],['G'],['G'],['D7'],['G'],['G'],['G'],['B7'],['B7'],
+    ['Em'],['Em'],['Am'],['D7'],['G'],['G'],['D7'],['G'],['G'],['G7'],['C'],['C'],['G'],['G'],['Am7','D7'],['G'] ] },
+  'Mr. P.C.': { key: 'C minor (Blues)', bpm: 210, m: [
+    ['Cm7'],['Cm7'],['Cm7'],['Cm7'],['Fm7'],['Fm7'],['Cm7'],['Cm7'],['Dm7b5'],['G7'],['Cm7'],['Dm7b5','G7'] ] },
+  'Night And Day': { key: 'C Major', bpm: 140, m: [
+    ['Db7'],['Db7'],['Cmaj7'],['Cmaj7'],['Db7'],['Db7'],['Cmaj7'],['Cmaj7'],['Am7'],['Am7'],['Cm7','F7'],['Bbmaj7'],['Bbm7','Eb7'],['Abmaj7'],['Dm7b5','G7'],['Cmaj7'],
+    ['Db7'],['Db7'],['Cmaj7'],['Cmaj7'],['Db7'],['Db7'],['Cmaj7'],['Cmaj7'],['Am7'],['Am7'],['Cm7','F7'],['Bbmaj7'],['Bbm7','Eb7'],['Abmaj7'],['Dm7b5','G7'],['Cmaj7'] ] },
+  "Now's The Time": { key: 'F Major (Blues)', bpm: 190, m: [
+    ['F7'],['F7'],['F7'],['F7'],['Bb7'],['Bb7'],['F7'],['F7'],['Gm7'],['C7'],['F7','D7'],['Gm7','C7'] ] },
+  'Oleo': { key: 'Bb Major', bpm: 220, m: [
+    ['Bbmaj7','G7'],['Cm7','F7'],['Dm7','G7'],['Cm7','F7'],['Bbmaj7','Bb7'],['Ebmaj7','Edim'],['Bbmaj7/F','F7'],['Bbmaj7'],['Bbmaj7','G7'],['Cm7','F7'],['Dm7','G7'],['Cm7','F7'],['Bbmaj7','Bb7'],['Ebmaj7','Edim'],['Cm7','F7'],['Bbmaj7'],
+    ['D7'],['D7'],['G7'],['G7'],['C7'],['C7'],['F7'],['F7'],['Bbmaj7','G7'],['Cm7','F7'],['Dm7','G7'],['Cm7','F7'],['Bbmaj7','Bb7'],['Ebmaj7','Edim'],['Cm7','F7'],['Bbmaj7'] ] },
+  'Ornithology': { key: 'G Major', bpm: 210, m: [
+    ['Gmaj7'],['Gmaj7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ebmaj7'],['Em7b5'],['A7'],['Dmaj7'],['Dmaj7'],['Fm7'],['Bb7'],['Ebmaj7'],['Dm7','G7'],['Cmaj7'],['Cmaj7'],
+    ['Gmaj7'],['Gmaj7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ebmaj7'],['Em7b5'],['A7'],['Dmaj7'],['Dmaj7'],['Fm7'],['Bb7'],['Ebmaj7'],['Dm7b5','G7'],['Cmaj7'],['Cmaj7'] ] },
+  'Satin Doll': { key: 'C Major', bpm: 140, m: [
+    ['Dm7'],['G7'],['Dm7'],['G7'],['Em7'],['A7'],['Em7'],['A7'],['Am7'],['D7'],['Abm7'],['Db7'],['Cmaj7'],['A7'],['Dm7','G7'],['Cmaj7'],
+    ['Dm7'],['G7'],['Dm7'],['G7'],['Em7'],['A7'],['Em7'],['A7'],['Gm7'],['C7'],['Gm7'],['C7'],['Fmaj7'],['Fmaj7'],['Am7','D7'],['Dm7','G7'],
+    ['Em7'],['A7'],['Dm7','G7'],['Cmaj7'] ] },
+  'Softly, As In A Morning Sunrise': { key: 'C minor', bpm: 165, m: [
+    ['Cm7'],['Dm7b5','G7'],['Cm7'],['Dm7b5','G7'],['Cm7'],['Dm7b5','G7'],['Cm7'],['Fm7','Bb7'],['Ebmaj7'],['Ebmaj7'],['C7'],['C7'],['Fm7'],['Fm7'],['F#dim7'],['G7'],
+    ['Cm7'],['Dm7b5','G7'],['Cm7'],['Dm7b5','G7'],['Cm7'],['Dm7b5','G7'],['Cm7'],['Dm7b5','G7'],['Cm7'],['Cm7'],['Dm7b5','G7'],['Cm7'],['Cm7'],['Cm7'],['Dm7b5','G7'],['Cm7'] ] },
+  'Summertime': { key: 'A minor', bpm: 75, m: [
+    ['Am6'],['Bm7b5'],['Am6'],['Am6'],['Dm'],['Dm/F'],['Am'],['C°','B7'],['E7'],['E7'],['Am6'],['Bm7b5'],['Am6'],['Am6'],['D7','G7sus4'],['Am6','Bm6'] ] },
+  'St. Thomas': { key: 'C Major', bpm: 190, m: [
+    ['Cmaj7'],['Cmaj7'],['C7'],['Fmaj7'],['Fm7'],['Fm7'],['Em7'],['A7'],['Dm7'],['G7'],['Cmaj7'],['Cmaj7'],['Cmaj7'],['Cmaj7'],['C7'],['Fmaj7'],
+    ['Fm7'],['Fm7'],['Em7'],['A7'],['Dm7','G7'],['Cmaj7'],['Cmaj7'],['Cmaj7'],['E7'],['E7'],['Am7'],['Am7'],['D7'],['D7'],['Dm7'],['G7'],
+    ['Cmaj7'],['Cmaj7'],['C7'],['Fmaj7'],['Fm7'],['Fm7'],['Em7','A7'],['Dm7','G7'],['Cmaj7'],['Cmaj7'],['Cmaj7'],['Cmaj7'] ] },
+  'There Is No Greater Love': { key: 'Bb Major', bpm: 115, m: [
+    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],['Abmaj7'],['Abm6'],['Ebmaj7'],['Cm7'],['F7'],['F7'],['Fm7','Bb7'],['Bbmaj7'],
+    ['Bbmaj7'],['Eb7'],['Ab7'],['G7'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],['Abmaj7'],['Abm6'],['Ebmaj7'],['Cm7'],['Fm7'],['Bb7'],['Ebmaj7'],['Ebmaj7'] ] },
+  'There Will Never Be Another You': { key: 'Eb Major', bpm: 150, m: [
+    ['Ebmaj7'],['Ebmaj7'],['Dm7b5'],['G7'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],['Abmaj7'],['Abm6'],['Ebmaj7'],['Cm7'],['F7'],['F7'],['Fm7','Bb7'],['Ebmaj7'],
+    ['Ebmaj7'],['Ebmaj7'],['Dm7b5'],['G7'],['Cm7'],['Cm7'],['Bbm7'],['Eb7'],['Abmaj7'],['Abm6'],['Ebmaj7'],['Am7b5','D7'],['Gm7b5','C7'],['Fm7','Bb7'],['Ebmaj7'],['Ebmaj7'] ] },
+  "Take The 'A' Train": { key: 'C Major', bpm: 150, m: [
+    ['Cmaj7'],['Cmaj7'],['D7'],['D7'],['Dm7'],['G7'],['Cmaj7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Fmaj7'],['Fmaj7'],['D7'],['D7'],['Dm7'],['G7'],
+    ['Cmaj7'],['Cmaj7'],['D7'],['D7'],['Dm7'],['G7'],['Cmaj7'],['Gm7','C7'],['Fmaj7'],['Fmaj7'],['Fmaj7'],['Fmaj7'],['D7'],['D7'],['Dm7','G7'],['Cmaj7'] ] },
+  "You'd Be So Nice To Come Home To": { key: 'A minor', bpm: 150, m: [
+    ['Am7'],['E7'],['Am7'],['Am7'],['Dm7'],['Dm7'],['Bm7b5'],['E7'],['Am7'],['A7'],['Dm7'],['Dm/C'],['Bm7b5'],['E7'],['Am7'],['Am7'],
+    ['Am7'],['E7'],['Am7'],['Am7'],['Dm7'],['Dm7'],['Bm7b5'],['E7'],['Am7'],['F7'],['Bm7b5'],['E7'],['Am7'],['Am7'],['Bm7b5','E7'],['Am7'] ] },
 };
 
 // 코드 심볼 → 추천 스케일(한국어) 자동 매핑
@@ -1677,15 +1686,15 @@ function chordToScales(sym) {
   if (!mm) return [];
   const r = mm[1], q = mm[2];
   const S = (n) => r + ' ' + n;
-  if (/maj/.test(q))            return [S('아이오니안'), S('리디안')];
+  if (/maj/.test(q))            return [S('아이오니안'), S('리디안'), S('메이저 펜타토닉')];
   if (/dim|°/.test(q))          return [S('디미니쉬드')];
-  if (/m7b5|ø/.test(q))         return [S('로크리안')];
-  if (/m/.test(q))              return [S('도리안'), S('에올리안')];
+  if (/m7b5|ø/.test(q))         return [S('로크리안'), S('마이너 펜타토닉')];
+  if (/m/.test(q))              return [S('도리안'), S('에올리안'), S('마이너 펜타토닉')];
   if (/alt|7#9|7b9|7#5/.test(q))return [S('얼터드')];
   if (/7b5/.test(q))            return [S('리디안 ♭7'), S('홀톤')];
   if (/sus/.test(q))            return [S('믹솔리디안')];
-  if (/7|9|13/.test(q))         return [S('믹솔리디안')];
-  return [S('아이오니안'), S('리디안')];   // C, C6, Cmaj 등
+  if (/7|9|13/.test(q))         return [S('믹솔리디안'), S('블루스')];
+  return [S('아이오니안'), S('리디안'), S('메이저 펜타토닉')];   // C, C6, Cmaj 등
 }
 
 // 곡별 대표 BPM(연주마다 다르니 기준값) — 화면에서 수정 가능
@@ -1701,7 +1710,7 @@ function buildFixedSong(title, fixed) {
   return {
     title,
     key: fixed.key,
-    bpm: REALBOOK_BPM[title] || 120,
+    bpm: fixed.bpm || REALBOOK_BPM[title] || 120,
     measures: fixed.m.map(syms => ({ chords: syms.map(s => ({ symbol: s, scales: chordToScales(s) })) })),
   };
 }
@@ -1721,6 +1730,10 @@ const SCALE_INTERVALS = {
   '리디안 ♭7': [0,2,4,6,7,9,10],
   '하모닉 마이너': [0,2,3,5,7,8,11],
   '멜로딕 마이너': [0,2,3,5,7,9,11],
+  '마이너 펜타토닉': [0,3,5,7,10],
+  '메이저 펜타토닉': [0,2,4,7,9],
+  '블루스': [0,3,5,6,7,10],
+  '메이저 블루스': [0,2,3,4,7,9],
 };
 const NOTE_TO_PC = { C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,'E#':5,Fb:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11,Cb:11 };
 
@@ -1833,13 +1846,13 @@ const REALBOOK_DOC = {
     ],
   },
   'Beautiful Love': {
-    center: 'D 마이너',
-    summary: 'Em7b5–A7–Dm 의 단조 ii–V–i 가 반복되고 Dm 으로 끝나는 D단조 곡.',
+    center: 'E 마이너',
+    summary: 'F#m7b5–B7–Em 의 단조 ii–V–i 로 Em 으로 끝나는 E단조 곡.',
     steps: [
-      'Em7b5 → A7 → Dm 은 D단조의 ii–V–i 입니다(2도 자리의 m7b5 + 도미넌트 A7).',
-      '이 ii–V–i 가 곡 곳곳에서 반복되며 D 를 계속 으뜸음으로 확인시켜 줍니다.',
-      'Gm7·Bb7·C7 등은 D단조와 가까운 코드로 색을 더할 뿐입니다.',
-      '곡이 Dm 으로 끝납니다 → 중심키는 D 마이너.',
+      'F#m7b5 → B7 → Em 은 E단조의 ii–V–i 입니다(단조 도미넌트 B7).',
+      'Em7 → A7 → Dmaj7 부분은 D장조 쪽 ii–V–I 로 색을 줍니다.',
+      'Bm7b5 → E7 → Am 같은 ii–V 가 이어지며 가까운 조를 스칩니다.',
+      '곡이 Em 으로 끝남 → 중심키 E 마이너.',
     ],
   },
   'Oleo': {
@@ -1883,13 +1896,13 @@ const REALBOOK_DOC = {
     ],
   },
   'I Love You': {
-    center: 'F 메이저',
-    summary: 'Gm7b5–C7b9–Fmaj7 의 ii–V 로 F 로 도는 곡(중간에 A장조 색).',
+    center: 'Bb 메이저',
+    summary: 'Bbmaj7–Gm7–Cm7–F7(I–vi–ii–V)로 도는 Bb장조 곡(브릿지는 G장조).',
     steps: [
-      'Gm7b5 → C7b9 → Fmaj7 은 F로 향하는 ii–V–I 입니다.',
-      'Gm7–C7–Fmaj7 의 보통 ii–V–I 도 반복되어 F 를 굳힙니다.',
-      'B7–E7–Amaj7 부분은 잠깐 A장조로 가는 임시 전조입니다.',
-      '끝이 F6 → 중심키 F 메이저.',
+      '첫 코드 Bbmaj7, Cm7 → F7 → Bb 의 ii–V–I 로 Bb 를 가리킵니다.',
+      'Bbm7 → Eb7 → Abmaj7 부분은 Ab장조로 잠깐 갑니다.',
+      'Am7 → D7 → Gmaj7 은 G장조로 가는 임시 전조.',
+      '끝이 Bbmaj7 → 중심키 Bb 메이저.',
     ],
   },
   "I'll Remember April": {
@@ -1903,23 +1916,23 @@ const REALBOOK_DOC = {
     ],
   },
   'Just Friends': {
-    center: 'G 메이저',
-    summary: 'Cmaj7 근처에서 시작하지만 Am7–D7–G 로 도는 G장조 곡.',
+    center: 'C 메이저',
+    summary: 'Cmaj7 로 시작, Cm7–F7–Bbmaj7 등 ii–V 연쇄로 도는 C장조 곡.',
     steps: [
-      '시작은 G7–Cmaj7(C쪽 색)이지만 Cm7–F7 로 G장조 쪽으로 끌어옵니다.',
-      'Am7 → D7 → G 가 곡 곳곳에서 G장조의 ii–V–I 로 해결됩니다.',
-      'Bbm7–Eb7 등은 잠깐의 색이고, 끝이 G6 / Dm7–G7 로 G 를 가리킵니다.',
-      '조표(샵 1개)와 종지 → 중심키 G 메이저.',
+      '첫 코드 Cmaj7 → 중심 후보 C.',
+      'Cm7 → F7 → Bbmaj7, Bbm7 → Eb7 → Abmaj7 처럼 ii–V 가 연쇄로 내려갑니다.',
+      'Am7 → D7 → Gmaj7, Em7 → A7 을 거쳐 다시 C 로 향합니다.',
+      '끝이 C6 종지 → 중심키 C 메이저.',
     ],
   },
   'Lullaby Of Birdland': {
-    center: 'F 마이너',
-    summary: 'Fm 으로 시작·끝나고 Bbm7–Eb7–Abmaj7(상대조 Ab)를 오가는 F단조 곡.',
+    center: 'A 마이너',
+    summary: 'Am7 으로 시작·끝나고 Dm–C, Bm7b5–E7 로 도는 A단조 곡(기타용 조옮김).',
     steps: [
-      'Fm – G7 C7 – Fm 로 F 가 으뜸음임을 보여줍니다(C7 은 Fm 의 도미넌트 V).',
-      'Bbm7 → Eb7 → Abmaj7 은 Ab장조(=F단조의 상대조)의 ii–V–I 로, 두 조를 오갑니다.',
-      '브릿지의 F7 → Bbm7 도 도미넌트 움직임.',
-      '곡이 Fm 로 끝남 → 중심키 F 마이너(상대조 Ab장조).',
+      'Am7 – B7/E7 – Am7 로 A 가 으뜸음임을 보여줍니다(E7 은 Am 의 도미넌트 V).',
+      'Bm7b5 → E7 → Am 은 A단조의 ii–V–i.',
+      'Em7b5 → A7 → Dm, Dm7–C 등 ii–V 가 이어집니다.',
+      '곡이 Am7 으로 끝남 → 중심키 A 마이너.',
     ],
   },
   'Mr. P.C.': {
@@ -2006,7 +2019,7 @@ function analyzeKey() {
 }
 
 // ── BPM 반주 재생 ──────────────────────────────
-let rbPlayTimer = null, rbPlayIdx = 0, rbMuted = false;
+let rbPlayTimer = null, rbPlayIdx = 0, rbMuted = false, rbLoop = false;
 
 function chordIntervals(q) {
   q = q || '';
@@ -2044,12 +2057,14 @@ function rbTogglePlay() {
   rbPlayIdx = 0;
   const step = () => {
     document.querySelectorAll('#rbSheet .rb-measure.playing').forEach(m => m.classList.remove('playing'));
-    if (rbPlayIdx >= measures.length) { rbStop(); return; }
+    if (rbPlayIdx >= measures.length) {
+      if (rbLoop) { rbPlayIdx = 0; }   // 반복: 처음부터
+      else { rbStop(); return; }
+    }
     const cell = cells[rbPlayIdx];
     const chords = measures[rbPlayIdx].chords || [];
     if (cell) {
-      cell.classList.add('playing');
-      cell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      cell.classList.add('playing');   // 지판을 보고 있을 수 있으니 화면은 스크롤하지 않음
       if (chords[0]) showSongScales(chords[0], cell.querySelector('.rb-chord'));
     }
     if (!rbMuted) {
@@ -2080,6 +2095,12 @@ function initRealBook() {
     const b = document.getElementById('rbMuteBtn');
     b.textContent = rbMuted ? '🔇' : '🔊';
     b.setAttribute('aria-pressed', rbMuted);
+  });
+  document.getElementById('rbLoopBtn').addEventListener('click', () => {
+    rbLoop = !rbLoop;
+    const b = document.getElementById('rbLoopBtn');
+    b.classList.toggle('on', rbLoop);
+    b.setAttribute('aria-pressed', rbLoop);
   });
 }
 
